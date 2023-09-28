@@ -8,6 +8,7 @@ type CheckList struct {
 	Conclusion []string
 }
 
+// TODO: maybe we can just delete this
 func MapChecks(checks *github.ListCheckRunsResults) CheckList {
 	var checklist CheckList
 	for _, check := range checks.CheckRuns {
