@@ -7,7 +7,7 @@ import (
 )
 
 type DataAccessLayer interface {
-	GatherChecks(string, context.Context) (*github.ListCheckRunsResults, error)
+	ListChecks(string, context.Context) (*github.ListCheckRunsResults, error)
 }
 
 type GithubDAL struct {
@@ -16,6 +16,7 @@ type GithubDAL struct {
 	repository string
 }
 
+// TODO: Might not need this function may delete later
 func InitGithubDAL(client *github.Client, owner, repository string) DataAccessLayer {
 
 	return &GithubDAL{client: client, owner: owner, repository: repository}

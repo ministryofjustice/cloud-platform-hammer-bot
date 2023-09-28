@@ -6,7 +6,7 @@ import (
 	"github.com/google/go-github/github"
 )
 
-func (c *GithubDAL) GatherChecks(reference string, ctx context.Context) (*github.ListCheckRunsResults, error) {
+func (c *GithubDAL) ListChecks(reference string, ctx context.Context) (*github.ListCheckRunsResults, error) {
 	checks, _, err := c.client.Checks.ListCheckRunsForRef(ctx, c.owner, c.repository, reference, nil)
 	if err != nil {
 		return nil, err
