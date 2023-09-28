@@ -8,7 +8,7 @@ import (
 	"golang.org/x/oauth2"
 )
 
-func init_gh(token string) (*github.Client, error) {
+func InitGH(token string) (*github.Client, error) {
 	var client *github.Client
 	ctx := context.Background()
 
