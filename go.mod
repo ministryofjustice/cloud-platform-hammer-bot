@@ -5,7 +5,6 @@ go 1.21.0
 require (
 	github.com/gin-gonic/gin v1.9.1
 	github.com/google/go-github v17.0.0+incompatible
-	github.com/undefinedlabs/go-mpatch v1.0.7
 	golang.org/x/oauth2 v0.12.0
 )
 

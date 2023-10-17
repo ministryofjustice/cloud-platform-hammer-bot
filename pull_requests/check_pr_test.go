@@ -3,21 +3,25 @@ package pull_requests
 import (
 	"reflect"
 	"testing"
+	"time"
 
 	"github.com/google/go-github/github"
 )
 
+func wrapTimeSince(mins int64) func(time.Time) time.Duration {
+	return func(time.Time) time.Duration {
+		return time.Duration(mins) * time.Minute
+	}
+}
+
 func TestCheckPRStatus(t *testing.T) {
-	// mpatch.PatchMethod(time.Now, func() time.Time {
-	// 	return time.Date(2020, 11, 01, 00, 00, 00, 0, time.UTC)
-	// })
-	// mpatch.PatchMethod(time.Since, func() time.Duration {
-	// 	return time.Duration(0 * time.Minute)
-	// })
-	// // tenMins := time.Duration(10 * time.Minute)
-	// inProgressTime := time.Now().Add(-9 * time.Minute)
+	tenMins := time.Duration(10 * time.Minute)
+	inProgressTime := time.Now().Add(-9 * time.Minute)
+	mockRetryInShort := tenMins - wrapTimeSince(9)(inProgressTime)
+
 	type args struct {
-		checks *github.ListCheckRunsResults
+		checks       *github.ListCheckRunsResults
+		getTimeSince func(time.Time) time.Duration
 	}
 	tests := []struct {
 		name string
@@ -36,6 +40,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: nil,
 		},
@@ -51,6 +56,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: nil,
 		},
@@ -67,6 +73,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: []PRStatus{
 				{
@@ -90,6 +97,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: []PRStatus{
 				{
@@ -113,6 +121,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: []PRStatus{
 				{
@@ -136,6 +145,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: []PRStatus{
 				{
@@ -159,6 +169,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: []PRStatus{
 				{
@@ -182,6 +193,7 @@ func TestCheckPRStatus(t *testing.T) {
 						},
 					},
 				},
+				getTimeSince: time.Since,
 			},
 			want: []PRStatus{
 				{
@@ -192,39 +204,58 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 			},
 		},
-		// {
-		// 	name: "check in progress and less than 10 mins old",
-		// 	args: args{
-		// 		checks: &github.ListCheckRunsResults{
-		// 			Total: github.Int(1),
-		// 			CheckRuns: []*github.CheckRun{
-		// 				{
-		// 					Status:    github.String("in_progress"),
-		// 					StartedAt: &github.Timestamp{Time: inProgressTime},
-		// 					Name:      github.String("in progress check"),
-		// 				},
-		// 			},
-		// 		},
-		// 	},
-		// 	want: []PRStatus{
-		// 		{
-		// 			Name:    "in progress check",
-		// 			Message: "this check has only just been started check back again in x mins",
-		// 			Status:  Pending,
-		// 			retryIn: time.Since(time.Now()),
-		// 		},
-		// 	},
-		// },
-		// {
-		// 	name: "check in progress and more than 10 mins old",
-		// },
-		// {
-		// 	name: "check still in a queued state",
-		// },
+		{
+			name: "check in progress and LESS than 10 mins old",
+			args: args{
+				checks: &github.ListCheckRunsResults{
+					Total: github.Int(1),
+					CheckRuns: []*github.CheckRun{
+						{
+							Status:    github.String("in_progress"),
+							StartedAt: &github.Timestamp{Time: inProgressTime},
+							Name:      github.String("in progress short running check"),
+						},
+					},
+				},
+				getTimeSince: wrapTimeSince(9),
+			},
+			want: []PRStatus{
+				{
+					Name:    "in progress short running check",
+					Message: "this check has only just been started check back again in " + mockRetryInShort.String(),
+					Status:  Pending,
+					retryIn: mockRetryInShort,
+				},
+			},
+		},
+		{
+			name: "check in progress and MORE than 10 mins old",
+			args: args{
+				checks: &github.ListCheckRunsResults{
+					Total: github.Int(1),
+					CheckRuns: []*github.CheckRun{
+						{
+							Status:    github.String("in_progress"),
+							StartedAt: &github.Timestamp{Time: inProgressTime},
+							Name:      github.String("in progress long running check"),
+						},
+					},
+				},
+				getTimeSince: wrapTimeSince(20),
+			},
+			want: []PRStatus{
+				{
+					Name:    "in progress long running check",
+					Message: "this check has been running for at least 10 mins, looks like something has gone wrong?",
+					Status:  Pending,
+					retryIn: 0,
+				},
+			},
+		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CheckPRStatus(tt.args.checks); !reflect.DeepEqual(got, tt.want) {
+			if got := CheckPRStatus(tt.args.checks, tt.args.getTimeSince); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CheckPRStatus() = %v, want %v", got, tt.want)
 			}
 		})

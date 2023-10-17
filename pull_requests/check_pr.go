@@ -21,7 +21,7 @@ type PRStatus struct {
 	retryIn time.Duration
 }
 
-func CheckPRStatus(checks *github.ListCheckRunsResults) []PRStatus {
+func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.Time) time.Duration) []PRStatus {
 	var prStatus []PRStatus // failed or pending statuses
 
 	for _, check := range checks.CheckRuns {
@@ -54,14 +54,12 @@ func CheckPRStatus(checks *github.ListCheckRunsResults) []PRStatus {
 
 		if *check.Status == "in_progress" {
 			// 10 mins - elaspsed time = retry again in x time
-			// ((time now - started at time) elaspsed time)
 			tenMins := time.Duration(10 * time.Minute)
-			timeSinceStart := time.Since(*&check.StartedAt.Time)
+			timeSinceStart := getTimeSince(*&check.StartedAt.Time)
 
 			// if the checks are like less 5 mins old, respond to the slack bot to add a comment saying in future make sure to only post your pr when its completed all it's checks
 			if (timeSinceStart) < tenMins {
-				// TODO: add a meaningful message for both outcomes
-				prStatus = append(prStatus, PRStatus{*check.Name, "this check has only just been started check back again in x mins", Pending, timeSinceStart})
+				prStatus = append(prStatus, PRStatus{*check.Name, "this check has only just been started check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart})
 				continue
 			} else {
 				prStatus = append(prStatus, PRStatus{*check.Name, "this check has been running for at least 10 mins, looks like something has gone wrong?", Pending, 0})
@@ -93,10 +91,11 @@ func CheckPRStatus(checks *github.ListCheckRunsResults) []PRStatus {
 //      "enum": [
 //        "success", x
 //        "failure", x
-//        "neutral",
+//        "neutral", x
 //        "cancelled",
 //        "skipped", x
+//        "stale", x
 //        "timed_out", x
 //        "action_required", x
-//        null
+//        null x
 //      ],
