@@ -1,7 +1,6 @@
 package pull_requests
 
 import (
-	"fmt"
 	"time"
 
 	"github.com/google/go-github/github"
@@ -33,27 +32,36 @@ func CheckPRStatus(checks *github.ListCheckRunsResults) []PRStatus {
 			case "skipped":
 				continue
 			case "failure":
-				prStatus = append(prStatus, PRStatus{*check.Name, "this check failed check your pr and ammend", Failure, 0})
+				prStatus = append(prStatus, PRStatus{*check.Name, "this check failed, check your pr and ammend", Failure, 0})
 				continue
 			case "action_required":
-				prStatus = append(prStatus, PRStatus{*check.Name, "this check failed because an action is required check your pr and ammend", Failure, 0})
+				prStatus = append(prStatus, PRStatus{*check.Name, "this check failed because an action is required, check your pr and ammend", Failure, 0})
 				continue
 			case "cancelled":
 				prStatus = append(prStatus, PRStatus{*check.Name, "this check failed because somebody manually cancelled the check", Failure, 0})
 				continue
+			case "timed_out":
+				prStatus = append(prStatus, PRStatus{*check.Name, "this check failed because it timed out", Failure, 0})
+				continue
+			case "stale":
+				prStatus = append(prStatus, PRStatus{*check.Name, "this check failed because it was stale", Failure, 0})
+				continue
 			default:
-				fmt.Printf("unaccounted for value %s %s", *check.Name, *check.Status) // neutral / null
+				prStatus = append(prStatus, PRStatus{*check.Name, "unaccounted for state conclusion: " + *check.Conclusion, Failure, 0})
+				continue
 			}
 		}
 
 		if *check.Status == "in_progress" {
 			// 10 mins - elaspsed time = retry again in x time
 			// ((time now - started at time) elaspsed time)
-			tenMins := time.Duration(-10 * time.Minute)
+			tenMins := time.Duration(10 * time.Minute)
+			timeSinceStart := time.Since(*&check.StartedAt.Time)
 
 			// if the checks are like less 5 mins old, respond to the slack bot to add a comment saying in future make sure to only post your pr when its completed all it's checks
-			if (time.Since(*&check.StartedAt.Time)) < tenMins {
-				prStatus = append(prStatus, PRStatus{*check.Name, "this check has only just been started check back again in x mins", Pending, time.Since(*&check.StartedAt.Time) - tenMins})
+			if (timeSinceStart) < tenMins {
+				// TODO: add a meaningful message for both outcomes
+				prStatus = append(prStatus, PRStatus{*check.Name, "this check has only just been started check back again in x mins", Pending, timeSinceStart})
 				continue
 			} else {
 				prStatus = append(prStatus, PRStatus{*check.Name, "this check has been running for at least 10 mins, looks like something has gone wrong?", Pending, 0})
