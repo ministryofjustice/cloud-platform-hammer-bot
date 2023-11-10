@@ -31,12 +31,12 @@ func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.T
 		}
 
 		if *check.Status == "in_progress" {
-			prStatus = NoneCompletedCheck(check, prStatus, getTimeSince)
+			prStatus = InProgressCheck(check, prStatus, getTimeSince)
 			continue
 		}
 
 		if *check.Status == "queued" {
-			prStatus = NoneCompletedCheck(check, prStatus, getTimeSince)
+			prStatus = QueuedCheck(check, prStatus, getTimeSince)
 			continue
 		}
 	}
