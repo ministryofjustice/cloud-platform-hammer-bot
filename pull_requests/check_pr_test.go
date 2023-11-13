@@ -222,7 +222,7 @@ func TestCheckPRStatus(t *testing.T) {
 			want: []PRStatus{
 				{
 					Name:    "in progress short running check",
-					Message: "this check has only just been started check back again in " + mockRetryInShort.String(),
+					Message: "this check is in_progress and has just been started. check back again in " + mockRetryInShort.String(),
 					Status:  Pending,
 					retryIn: mockRetryInShort,
 				},
@@ -246,7 +246,55 @@ func TestCheckPRStatus(t *testing.T) {
 			want: []PRStatus{
 				{
 					Name:    "in progress long running check",
-					Message: "this check has been running for at least 10 mins, looks like something has gone wrong?",
+					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
+					Status:  Pending,
+					retryIn: 0,
+				},
+			},
+		},
+		{
+			name: "check queued and LESS than 10 mins old",
+			args: args{
+				checks: &github.ListCheckRunsResults{
+					Total: github.Int(1),
+					CheckRuns: []*github.CheckRun{
+						{
+							Status:    github.String("queued"),
+							StartedAt: &github.Timestamp{Time: inProgressTime},
+							Name:      github.String("queued short running check"),
+						},
+					},
+				},
+				getTimeSince: wrapTimeSince(9),
+			},
+			want: []PRStatus{
+				{
+					Name:    "queued short running check",
+					Message: "this check has been queued for less than 10 minutes, check back again in " + mockRetryInShort.String(),
+					Status:  Pending,
+					retryIn: mockRetryInShort,
+				},
+			},
+		},
+		{
+			name: "check queued and MORE than 10 mins old",
+			args: args{
+				checks: &github.ListCheckRunsResults{
+					Total: github.Int(1),
+					CheckRuns: []*github.CheckRun{
+						{
+							Status:    github.String("queued"),
+							StartedAt: &github.Timestamp{Time: inProgressTime},
+							Name:      github.String("queued long running check"),
+						},
+					},
+				},
+				getTimeSince: wrapTimeSince(20),
+			},
+			want: []PRStatus{
+				{
+					Name:    "queued long running check",
+					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
 					Status:  Pending,
 					retryIn: 0,
 				},

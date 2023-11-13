@@ -88,7 +88,7 @@ func TestInProgressCheck(t *testing.T) {
 }
 
 func TestQueuedCheck(t *testing.T) {
-
+	n := mockTimeNow(time.Now())
 	tests := []struct {
 		name           string
 		check          *github.CheckRun
@@ -101,7 +101,7 @@ func TestQueuedCheck(t *testing.T) {
 			name: "check started more than 10 minutes ago and is queued",
 			check: &github.CheckRun{
 				Name:       github.String("test check queued"),
-				StartedAt:  &github.Timestamp{Time: time.Now().Add(-15 * time.Minute)},
+				StartedAt:  &github.Timestamp{Time: n().Add(-15 * time.Minute)},
 				Conclusion: github.String("neutral"),
 			},
 			prStatus:     nil,
@@ -119,7 +119,7 @@ func TestQueuedCheck(t *testing.T) {
 			name: "check started exactly 10 minutes ago and is queued",
 			check: &github.CheckRun{
 				Name:       github.String("test check queued"),
-				StartedAt:  &github.Timestamp{Time: time.Now().Add(-10 * time.Minute)},
+				StartedAt:  &github.Timestamp{Time: n().Add(-10 * time.Minute)},
 				Conclusion: github.String("neutral"),
 			},
 			prStatus:     nil,
@@ -137,7 +137,7 @@ func TestQueuedCheck(t *testing.T) {
 			name: "check started less than 10 minutes ago and is queued",
 			check: &github.CheckRun{
 				Name:       github.String("test check queued"),
-				StartedAt:  &github.Timestamp{Time: time.Now().Add(-5 * time.Minute)},
+				StartedAt:  &github.Timestamp{Time: n().Add(-5 * time.Minute)},
 				Conclusion: github.String("neutral"),
 			},
 			prStatus:     nil,
@@ -145,7 +145,7 @@ func TestQueuedCheck(t *testing.T) {
 			want: []PRStatus{
 				{
 					Name:    "test check queued",
-					Message: "this check is queued and has just started, check back again in " + (10*time.Minute - 5*time.Minute).String(),
+					Message: "this check has been queued for less than 10 minutes, check back again in " + (10*time.Minute - 5*time.Minute).String(),
 					Status:  Pending,
 					retryIn: (10*time.Minute - 5*time.Minute),
 				},

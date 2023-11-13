@@ -25,7 +25,7 @@ func QueuedCheck(check *github.CheckRun, prStatus []PRStatus, getTimeSince func(
 
 	// if the checks are like less 5 mins old, respond to the slack bot to add a comment saying in future make sure to only post your pr when its completed all it's checks
 	if timeSince {
-		prStatus = append(prStatus, PRStatus{*check.Name, "this check is queued and has just started, check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart})
+		prStatus = append(prStatus, PRStatus{*check.Name, "this check has been queued for less than 10 minutes, check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart})
 	} else if !timeSince {
 		prStatus = append(prStatus, PRStatus{*check.Name, "this check has been queued for at least 10 mins, looks like something has gone wrong?", Pending, 0})
 	}
