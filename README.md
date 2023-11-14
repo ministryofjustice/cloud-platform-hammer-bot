@@ -3,8 +3,7 @@
 TODO: 
 
 NEXT:
-- add error case for checkPrStatus()
-- look into what the value is being returned by retry
+- test timeSince function
 - add diagrams
 
 AFTER:

@@ -34,10 +34,10 @@ func TestInProgressCheck(t *testing.T) {
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
 			want: []InvalidChecks{
 				{
-					Name:    "test check in progress",
-					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
-					Status:  Pending,
-					retryIn: 0,
+					Name:           "test check in progress",
+					Message:        "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
+					Status:         Pending,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -52,10 +52,10 @@ func TestInProgressCheck(t *testing.T) {
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
 			want: []InvalidChecks{
 				{
-					Name:    "test check in progress",
-					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
-					Status:  Pending,
-					retryIn: 0,
+					Name:           "test check in progress",
+					Message:        "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
+					Status:         Pending,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -70,10 +70,10 @@ func TestInProgressCheck(t *testing.T) {
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
 			want: []InvalidChecks{
 				{
-					Name:    "test check in progress",
-					Message: "this check is in_progress and has just been started. check back again in " + (10*time.Minute - 5*time.Minute).String(),
-					Status:  Pending,
-					retryIn: (10*time.Minute - 5*time.Minute),
+					Name:           "test check in progress",
+					Message:        "this check is in_progress and has just been started. check back again in " + (10*time.Minute - 5*time.Minute).String(),
+					Status:         Pending,
+					RetryInNanoSec: (10*time.Minute - 5*time.Minute),
 				},
 			},
 		},
@@ -108,10 +108,10 @@ func TestQueuedCheck(t *testing.T) {
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
 			want: []InvalidChecks{
 				{
-					Name:    "test check queued",
-					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
-					Status:  Pending,
-					retryIn: 0,
+					Name:           "test check queued",
+					Message:        "this check has been queued for at least 10 mins, looks like something has gone wrong?",
+					Status:         Pending,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -126,10 +126,10 @@ func TestQueuedCheck(t *testing.T) {
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
 			want: []InvalidChecks{
 				{
-					Name:    "test check queued",
-					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
-					Status:  Pending,
-					retryIn: 0,
+					Name:           "test check queued",
+					Message:        "this check has been queued for at least 10 mins, looks like something has gone wrong?",
+					Status:         Pending,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -144,10 +144,10 @@ func TestQueuedCheck(t *testing.T) {
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
 			want: []InvalidChecks{
 				{
-					Name:    "test check queued",
-					Message: "this check has been queued for less than 10 minutes, check back again in " + (10*time.Minute - 5*time.Minute).String(),
-					Status:  Pending,
-					retryIn: (10*time.Minute - 5*time.Minute),
+					Name:           "test check queued",
+					Message:        "this check has been queued for less than 10 minutes, check back again in " + (10*time.Minute - 5*time.Minute).String(),
+					Status:         Pending,
+					RetryInNanoSec: (10*time.Minute - 5*time.Minute),
 				},
 			},
 		},

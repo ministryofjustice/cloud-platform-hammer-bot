@@ -32,7 +32,8 @@ func timeSince(check *github.CheckRun, getTimeSince func(time.Time) time.Duratio
 	tenMins := time.Duration(10 * time.Minute)
 	timeSinceStart := getTimeSince(check.StartedAt.Time)
 	rounded := time.Duration(timeSinceStart.Seconds()+0.5) * time.Second
-	if (timeSinceStart) < tenMins {
+
+	if timeSinceStart < tenMins {
 		return true, rounded, tenMins
 	} else {
 		return false, rounded, tenMins

@@ -17,7 +17,7 @@ func wrapTimeSince(mins int64) func(time.Time) time.Duration {
 func TestCheckInvalidChecks(t *testing.T) {
 	tenMins := time.Duration(10 * time.Minute)
 	inProgressTime := time.Now().Add(-9 * time.Minute)
-	mockRetryInShort := tenMins - wrapTimeSince(9)(inProgressTime)
+	mockRetryInNanoSecShort := tenMins - wrapTimeSince(9)(inProgressTime)
 
 	type args struct {
 		checks       *github.ListCheckRunsResults
@@ -43,8 +43,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want:    nil,
-			wantErr: nil,
+			want: nil,
 		},
 		{
 			name: "check is completed and skipped",
@@ -60,8 +59,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want:    nil,
-			wantErr: nil,
+			want: nil,
 		},
 		{
 			name: "check is completed and failed",
@@ -80,13 +78,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "failed check",
-					Message: "this check failed, check your pr and ammend",
-					Status:  Failure,
-					RetryIn: 0,
+					Name:           "failed check",
+					Message:        "this check failed, check your pr and ammend",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check is completed and action required",
@@ -105,13 +102,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "action required check",
-					Message: "this check failed because an action is required, check your pr and ammend",
-					Status:  Failure,
-					RetryIn: 0,
+					Name:           "action required check",
+					Message:        "this check failed because an action is required, check your pr and ammend",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check is completed and cancelled",
@@ -130,13 +126,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "cancelled check",
-					Message: "this check failed because somebody manually cancelled the check",
-					Status:  Failure,
-					RetryIn: 0,
+					Name:           "cancelled check",
+					Message:        "this check failed because somebody manually cancelled the check",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check is completed and timed out",
@@ -155,13 +150,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "timed out check",
-					Message: "this check failed because it timed out",
-					Status:  Failure,
-					RetryIn: 0,
+					Name:           "timed out check",
+					Message:        "this check failed because it timed out",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check is completed and stale",
@@ -180,13 +174,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "stale check",
-					Message: "this check failed because it was stale",
-					Status:  Failure,
-					RetryIn: 0,
+					Name:           "stale check",
+					Message:        "this check failed because it was stale",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "default case",
@@ -205,13 +198,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "default check",
-					Message: "unaccounted for state conclusion: ",
-					Status:  Failure,
-					RetryIn: 0,
+					Name:           "default check",
+					Message:        "unaccounted for state conclusion: ",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check in progress and LESS than 10 mins old",
@@ -230,13 +222,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "in progress short running check",
-					Message: "this check is in_progress and has just been started. check back again in " + mockRetryInShort.String(),
-					Status:  Pending,
-					RetryIn: mockRetryInShort,
+					Name:           "in progress short running check",
+					Message:        "this check is in_progress and has just been started. check back again in " + mockRetryInNanoSecShort.String(),
+					Status:         Pending,
+					RetryInNanoSec: mockRetryInNanoSecShort,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check in progress and MORE than 10 mins old",
@@ -255,13 +246,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "in progress long running check",
-					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
-					Status:  Pending,
-					RetryIn: 0,
+					Name:           "in progress long running check",
+					Message:        "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
+					Status:         Pending,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check queued and LESS than 10 mins old",
@@ -280,13 +270,12 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "queued short running check",
-					Message: "this check has been queued for less than 10 minutes, check back again in " + mockRetryInShort.String(),
-					Status:  Pending,
-					RetryIn: mockRetryInShort,
+					Name:           "queued short running check",
+					Message:        "this check has been queued for less than 10 minutes, check back again in " + mockRetryInNanoSecShort.String(),
+					Status:         Pending,
+					RetryInNanoSec: mockRetryInNanoSecShort,
 				},
 			},
-			wantErr: nil,
 		},
 		{
 			name: "check queued and MORE than 10 mins old",
@@ -305,21 +294,17 @@ func TestCheckInvalidChecks(t *testing.T) {
 			},
 			want: []InvalidChecks{
 				{
-					Name:    "queued long running check",
-					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
-					Status:  Pending,
-					RetryIn: 0,
+					Name:           "queued long running check",
+					Message:        "this check has been queued for at least 10 mins, looks like something has gone wrong?",
+					Status:         Pending,
+					RetryInNanoSec: 0,
 				},
 			},
-			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got, err := CheckPRStatus(tt.args.checks, tt.args.getTimeSince); !reflect.DeepEqual(got, tt.want) {
-				if err != nil && tt.wantErr == nil {
-					t.Errorf("Unexpected Err = %v, but want %v", err.Error(), tt.wantErr)
-				}
+			if got := CheckPRStatus(tt.args.checks, tt.args.getTimeSince); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CheckPRStatus() = %v, want %v", got, tt.want)
 			}
 		})

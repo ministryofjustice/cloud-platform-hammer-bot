@@ -39,10 +39,10 @@ func TestCompletedCheck(t *testing.T) {
 			prStatus: []InvalidChecks{},
 			want: []InvalidChecks{
 				{
-					Name:    "failed check",
-					Message: "this check failed, check your pr and ammend",
-					Status:  Failure,
-					retryIn: 0,
+					Name:           "failed check",
+					Message:        "this check failed, check your pr and ammend",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -55,10 +55,10 @@ func TestCompletedCheck(t *testing.T) {
 			prStatus: []InvalidChecks{},
 			want: []InvalidChecks{
 				{
-					Name:    "action required check",
-					Message: "this check failed because an action is required, check your pr and ammend",
-					Status:  Failure,
-					retryIn: 0,
+					Name:           "action required check",
+					Message:        "this check failed because an action is required, check your pr and ammend",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -71,10 +71,10 @@ func TestCompletedCheck(t *testing.T) {
 			prStatus: []InvalidChecks{},
 			want: []InvalidChecks{
 				{
-					Name:    "cancelled check",
-					Message: "this check failed because somebody manually cancelled the check",
-					Status:  Failure,
-					retryIn: 0,
+					Name:           "cancelled check",
+					Message:        "this check failed because somebody manually cancelled the check",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -87,10 +87,10 @@ func TestCompletedCheck(t *testing.T) {
 			prStatus: []InvalidChecks{},
 			want: []InvalidChecks{
 				{
-					Name:    "timed out check",
-					Message: "this check failed because it timed out",
-					Status:  Failure,
-					retryIn: 0,
+					Name:           "timed out check",
+					Message:        "this check failed because it timed out",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -103,10 +103,10 @@ func TestCompletedCheck(t *testing.T) {
 			prStatus: []InvalidChecks{},
 			want: []InvalidChecks{
 				{
-					Name:    "stale check",
-					Message: "this check failed because it was stale",
-					Status:  Failure,
-					retryIn: 0,
+					Name:           "stale check",
+					Message:        "this check failed because it was stale",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
 		},
@@ -119,10 +119,10 @@ func TestCompletedCheck(t *testing.T) {
 			prStatus: []InvalidChecks{},
 			want: []InvalidChecks{
 				{
-					Name:    "unknown check",
-					Message: "unaccounted for state conclusion: unknown",
-					Status:  Failure,
-					retryIn: 0,
+					Name:           "unknown check",
+					Message:        "unaccounted for state conclusion: unknown",
+					Status:         Failure,
+					RetryInNanoSec: 0,
 				},
 			},
 		},

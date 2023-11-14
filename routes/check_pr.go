@@ -1,7 +1,6 @@
 package routes
 
 import (
-	"fmt"
 	"net/http"
 	"time"
 
@@ -24,17 +23,7 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 			utils.SendResponse(c, obj)
 		}
 
-		data, err := pull_requests.CheckPRStatus(checks, time.Since)
-
-		fmt.Printf("checkInvalidChecks %v", data)
-		if err != nil {
-			obj := utils.Response{
-				Status: http.StatusInternalServerError,
-				Error:  []string{"Reading from Redis"},
-			}
-			utils.SendResponse(c, obj)
-			return
-		}
+		data := pull_requests.CheckPRStatus(checks, time.Since)
 
 		obj := utils.Response{
 			Status: http.StatusOK,
