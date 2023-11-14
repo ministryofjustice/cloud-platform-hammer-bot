@@ -1,6 +1,7 @@
 package pull_requests
 
 import (
+	"fmt"
 	"time"
 
 	"github.com/google/go-github/github"
@@ -21,10 +22,12 @@ type InvalidChecks struct {
 	retryIn time.Duration
 }
 
-func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.Time) time.Duration) []InvalidChecks {
+func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.Time) time.Duration) ([]InvalidChecks, error) {
 	var prStatus []InvalidChecks
+	fmt.Printf("checkruns array %v", checks.GetTotal())
 
 	for _, check := range checks.CheckRuns {
+		fmt.Printf("prStatus array %v", prStatus)
 		if *check.Status == "completed" {
 			prStatus = CompletedCheck(check, prStatus)
 			continue
@@ -41,5 +44,5 @@ func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.T
 		}
 	}
 
-	return prStatus
+	return prStatus, nil
 }

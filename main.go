@@ -7,7 +7,14 @@ import (
 )
 
 func main() {
-	r := init_app.InitGin()
+	ginMode, ghToken := init_app.InitEnvVars()
+
+	ghClient, ghErr := init_app.InitGH(ghToken)
+	if ghErr != nil {
+		log.Fatal("Error initialising github client: ", ghErr)
+	}
+
+	r := init_app.InitGin(ginMode, ghClient)
 
 	err := r.Run(":3000")
 	if err != nil {

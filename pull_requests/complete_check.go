@@ -7,9 +7,9 @@ import (
 func CompletedCheck(check *github.CheckRun, prStatus []InvalidChecks) []InvalidChecks {
 	switch *check.Conclusion {
 	case "success":
-		prStatus = nil
+		break
 	case "skipped":
-		prStatus = nil
+		break
 	case "failure":
 		prStatus = append(prStatus, InvalidChecks{*check.Name, "this check failed, check your pr and ammend", Failure, 0})
 	case "action_required":

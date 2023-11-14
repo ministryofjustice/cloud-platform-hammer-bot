@@ -24,9 +24,10 @@ func TestCheckInvalidChecks(t *testing.T) {
 		getTimeSince func(time.Time) time.Duration
 	}
 	tests := []struct {
-		name string
-		args args
-		want []InvalidChecks
+		name    string
+		args    args
+		want    []InvalidChecks
+		wantErr error
 	}{
 		{
 			name: "check is completed and success",
@@ -42,7 +43,8 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: nil,
+			want:    nil,
+			wantErr: nil,
 		},
 		{
 			name: "check is completed and skipped",
@@ -58,7 +60,8 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: nil,
+			want:    nil,
+			wantErr: nil,
 		},
 		{
 			name: "check is completed and failed",
@@ -83,6 +86,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check is completed and action required",
@@ -107,6 +111,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check is completed and cancelled",
@@ -131,6 +136,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check is completed and timed out",
@@ -155,6 +161,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check is completed and stale",
@@ -179,6 +186,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "default case",
@@ -203,6 +211,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check in progress and LESS than 10 mins old",
@@ -227,6 +236,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: mockRetryInShort,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check in progress and MORE than 10 mins old",
@@ -251,6 +261,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check queued and LESS than 10 mins old",
@@ -275,6 +286,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: mockRetryInShort,
 				},
 			},
+			wantErr: nil,
 		},
 		{
 			name: "check queued and MORE than 10 mins old",
@@ -299,11 +311,15 @@ func TestCheckInvalidChecks(t *testing.T) {
 					retryIn: 0,
 				},
 			},
+			wantErr: nil,
 		},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := CheckPRStatus(tt.args.checks, tt.args.getTimeSince); !reflect.DeepEqual(got, tt.want) {
+			if got, err := CheckPRStatus(tt.args.checks, tt.args.getTimeSince); !reflect.DeepEqual(got, tt.want) {
+				if err != nil && tt.wantErr == nil {
+					t.Errorf("Unexpected Err = %v, but want %v", err.Error(), tt.wantErr)
+				}
 				t.Errorf("CheckPRStatus() = %v, want %v", got, tt.want)
 			}
 		})
