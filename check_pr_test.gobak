@@ -14,7 +14,7 @@ func wrapTimeSince(mins int64) func(time.Time) time.Duration {
 	}
 }
 
-func TestCheckInvalidChecks(t *testing.T) {
+func TestCheckPRStatus(t *testing.T) {
 	tenMins := time.Duration(10 * time.Minute)
 	inProgressTime := time.Now().Add(-9 * time.Minute)
 	mockRetryInShort := tenMins - wrapTimeSince(9)(inProgressTime)
@@ -26,7 +26,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want []InvalidChecks
+		want []PRStatus
 	}{
 		{
 			name: "check is completed and success",
@@ -75,7 +75,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "failed check",
 					Message: "this check failed, check your pr and ammend",
@@ -99,7 +99,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "action required check",
 					Message: "this check failed because an action is required, check your pr and ammend",
@@ -123,7 +123,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "cancelled check",
 					Message: "this check failed because somebody manually cancelled the check",
@@ -147,7 +147,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "timed out check",
 					Message: "this check failed because it timed out",
@@ -171,7 +171,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "stale check",
 					Message: "this check failed because it was stale",
@@ -195,7 +195,7 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "default check",
 					Message: "unaccounted for state conclusion: ",
@@ -219,10 +219,10 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: wrapTimeSince(9),
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "in progress short running check",
-					Message: "this check is in_progress and has just been started. check back again in " + mockRetryInShort.String(),
+					Message: "this check has only just been started check back again in " + mockRetryInShort.String(),
 					Status:  Pending,
 					retryIn: mockRetryInShort,
 				},
@@ -243,58 +243,10 @@ func TestCheckInvalidChecks(t *testing.T) {
 				},
 				getTimeSince: wrapTimeSince(20),
 			},
-			want: []InvalidChecks{
+			want: []PRStatus{
 				{
 					Name:    "in progress long running check",
-					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
-					Status:  Pending,
-					retryIn: 0,
-				},
-			},
-		},
-		{
-			name: "check queued and LESS than 10 mins old",
-			args: args{
-				checks: &github.ListCheckRunsResults{
-					Total: github.Int(1),
-					CheckRuns: []*github.CheckRun{
-						{
-							Status:    github.String("queued"),
-							StartedAt: &github.Timestamp{Time: inProgressTime},
-							Name:      github.String("queued short running check"),
-						},
-					},
-				},
-				getTimeSince: wrapTimeSince(9),
-			},
-			want: []InvalidChecks{
-				{
-					Name:    "queued short running check",
-					Message: "this check has been queued for less than 10 minutes, check back again in " + mockRetryInShort.String(),
-					Status:  Pending,
-					retryIn: mockRetryInShort,
-				},
-			},
-		},
-		{
-			name: "check queued and MORE than 10 mins old",
-			args: args{
-				checks: &github.ListCheckRunsResults{
-					Total: github.Int(1),
-					CheckRuns: []*github.CheckRun{
-						{
-							Status:    github.String("queued"),
-							StartedAt: &github.Timestamp{Time: inProgressTime},
-							Name:      github.String("queued long running check"),
-						},
-					},
-				},
-				getTimeSince: wrapTimeSince(20),
-			},
-			want: []InvalidChecks{
-				{
-					Name:    "queued long running check",
-					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
+					Message: "this check has been running for at least 10 mins, looks like something has gone wrong?",
 					Status:  Pending,
 					retryIn: 0,
 				},
