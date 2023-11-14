@@ -3,7 +3,6 @@
 TODO: 
 
 NEXT:
-- test timeSince function
 - add diagrams
 
 AFTER:
