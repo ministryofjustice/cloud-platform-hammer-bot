@@ -18,9 +18,9 @@ func TestInProgressCheck(t *testing.T) {
 	tests := []struct {
 		name           string
 		check          *github.CheckRun
-		prStatus       []PRStatus
+		prStatus       []InvalidChecks
 		getTimeSince   func(time.Time) time.Duration
-		want           []PRStatus
+		want           []InvalidChecks
 		timeSinceStart time.Duration
 	}{
 		{
@@ -32,7 +32,7 @@ func TestInProgressCheck(t *testing.T) {
 			},
 			prStatus:     nil,
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "test check in progress",
 					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
@@ -50,7 +50,7 @@ func TestInProgressCheck(t *testing.T) {
 			},
 			prStatus:     nil,
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "test check in progress",
 					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
@@ -68,7 +68,7 @@ func TestInProgressCheck(t *testing.T) {
 			},
 			prStatus:     nil,
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "test check in progress",
 					Message: "this check is in_progress and has just been started. check back again in " + (10*time.Minute - 5*time.Minute).String(),
@@ -92,9 +92,9 @@ func TestQueuedCheck(t *testing.T) {
 	tests := []struct {
 		name           string
 		check          *github.CheckRun
-		prStatus       []PRStatus
+		prStatus       []InvalidChecks
 		getTimeSince   func(time.Time) time.Duration
-		want           []PRStatus
+		want           []InvalidChecks
 		timeSinceStart time.Duration
 	}{
 		{
@@ -106,7 +106,7 @@ func TestQueuedCheck(t *testing.T) {
 			},
 			prStatus:     nil,
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "test check queued",
 					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
@@ -124,7 +124,7 @@ func TestQueuedCheck(t *testing.T) {
 			},
 			prStatus:     nil,
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "test check queued",
 					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
@@ -142,7 +142,7 @@ func TestQueuedCheck(t *testing.T) {
 			},
 			prStatus:     nil,
 			getTimeSince: func(t time.Time) time.Duration { return time.Since(t) },
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "test check queued",
 					Message: "this check has been queued for less than 10 minutes, check back again in " + (10*time.Minute - 5*time.Minute).String(),

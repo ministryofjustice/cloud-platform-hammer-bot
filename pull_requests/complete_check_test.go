@@ -11,8 +11,8 @@ func TestCompletedCheck(t *testing.T) {
 	tests := []struct {
 		name     string
 		check    *github.CheckRun
-		prStatus []PRStatus
-		want     []PRStatus
+		prStatus []InvalidChecks
+		want     []InvalidChecks
 	}{
 		{
 			name: "success",
@@ -36,8 +36,8 @@ func TestCompletedCheck(t *testing.T) {
 				Conclusion: github.String("failure"),
 				Name:       github.String("failed check"),
 			},
-			prStatus: []PRStatus{},
-			want: []PRStatus{
+			prStatus: []InvalidChecks{},
+			want: []InvalidChecks{
 				{
 					Name:    "failed check",
 					Message: "this check failed, check your pr and ammend",
@@ -52,8 +52,8 @@ func TestCompletedCheck(t *testing.T) {
 				Conclusion: github.String("action_required"),
 				Name:       github.String("action required check"),
 			},
-			prStatus: []PRStatus{},
-			want: []PRStatus{
+			prStatus: []InvalidChecks{},
+			want: []InvalidChecks{
 				{
 					Name:    "action required check",
 					Message: "this check failed because an action is required, check your pr and ammend",
@@ -68,8 +68,8 @@ func TestCompletedCheck(t *testing.T) {
 				Conclusion: github.String("cancelled"),
 				Name:       github.String("cancelled check"),
 			},
-			prStatus: []PRStatus{},
-			want: []PRStatus{
+			prStatus: []InvalidChecks{},
+			want: []InvalidChecks{
 				{
 					Name:    "cancelled check",
 					Message: "this check failed because somebody manually cancelled the check",
@@ -84,8 +84,8 @@ func TestCompletedCheck(t *testing.T) {
 				Conclusion: github.String("timed_out"),
 				Name:       github.String("timed out check"),
 			},
-			prStatus: []PRStatus{},
-			want: []PRStatus{
+			prStatus: []InvalidChecks{},
+			want: []InvalidChecks{
 				{
 					Name:    "timed out check",
 					Message: "this check failed because it timed out",
@@ -100,8 +100,8 @@ func TestCompletedCheck(t *testing.T) {
 				Conclusion: github.String("stale"),
 				Name:       github.String("stale check"),
 			},
-			prStatus: []PRStatus{},
-			want: []PRStatus{
+			prStatus: []InvalidChecks{},
+			want: []InvalidChecks{
 				{
 					Name:    "stale check",
 					Message: "this check failed because it was stale",
@@ -116,8 +116,8 @@ func TestCompletedCheck(t *testing.T) {
 				Conclusion: github.String("unknown"),
 				Name:       github.String("unknown check"),
 			},
-			prStatus: []PRStatus{},
-			want: []PRStatus{
+			prStatus: []InvalidChecks{},
+			want: []InvalidChecks{
 				{
 					Name:    "unknown check",
 					Message: "unaccounted for state conclusion: unknown",

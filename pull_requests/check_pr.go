@@ -14,15 +14,15 @@ const (
 	Pending
 )
 
-type PRStatus struct {
+type InvalidChecks struct {
 	Name    string
 	Message string
 	Status  Status
 	retryIn time.Duration
 }
 
-func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.Time) time.Duration) []PRStatus {
-	var prStatus []PRStatus
+func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.Time) time.Duration) []InvalidChecks {
+	var prStatus []InvalidChecks
 
 	for _, check := range checks.CheckRuns {
 		if *check.Status == "completed" {

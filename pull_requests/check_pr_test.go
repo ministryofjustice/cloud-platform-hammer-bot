@@ -14,7 +14,7 @@ func wrapTimeSince(mins int64) func(time.Time) time.Duration {
 	}
 }
 
-func TestCheckPRStatus(t *testing.T) {
+func TestCheckInvalidChecks(t *testing.T) {
 	tenMins := time.Duration(10 * time.Minute)
 	inProgressTime := time.Now().Add(-9 * time.Minute)
 	mockRetryInShort := tenMins - wrapTimeSince(9)(inProgressTime)
@@ -26,7 +26,7 @@ func TestCheckPRStatus(t *testing.T) {
 	tests := []struct {
 		name string
 		args args
-		want []PRStatus
+		want []InvalidChecks
 	}{
 		{
 			name: "check is completed and success",
@@ -75,7 +75,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "failed check",
 					Message: "this check failed, check your pr and ammend",
@@ -99,7 +99,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "action required check",
 					Message: "this check failed because an action is required, check your pr and ammend",
@@ -123,7 +123,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "cancelled check",
 					Message: "this check failed because somebody manually cancelled the check",
@@ -147,7 +147,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "timed out check",
 					Message: "this check failed because it timed out",
@@ -171,7 +171,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "stale check",
 					Message: "this check failed because it was stale",
@@ -195,7 +195,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: time.Since,
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "default check",
 					Message: "unaccounted for state conclusion: ",
@@ -219,7 +219,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: wrapTimeSince(9),
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "in progress short running check",
 					Message: "this check is in_progress and has just been started. check back again in " + mockRetryInShort.String(),
@@ -243,7 +243,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: wrapTimeSince(20),
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "in progress long running check",
 					Message: "this check has been in_progress for at least 10 mins, looks like something has gone wrong?",
@@ -267,7 +267,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: wrapTimeSince(9),
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "queued short running check",
 					Message: "this check has been queued for less than 10 minutes, check back again in " + mockRetryInShort.String(),
@@ -291,7 +291,7 @@ func TestCheckPRStatus(t *testing.T) {
 				},
 				getTimeSince: wrapTimeSince(20),
 			},
-			want: []PRStatus{
+			want: []InvalidChecks{
 				{
 					Name:    "queued long running check",
 					Message: "this check has been queued for at least 10 mins, looks like something has gone wrong?",
