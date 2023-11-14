@@ -19,7 +19,7 @@ type InvalidChecks struct {
 	Name    string
 	Message string
 	Status  Status
-	retryIn time.Duration
+	RetryIn time.Duration
 }
 
 func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.Time) time.Duration) ([]InvalidChecks, error) {
