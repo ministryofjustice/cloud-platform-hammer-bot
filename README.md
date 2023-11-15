@@ -2,9 +2,6 @@
 
 TODO: 
 
-NEXT:
-- add diagrams
-
 AFTER:
 - we should also think about in the future pushing an empty commit to retrigger the check (separate api route)
 - prep deploy by copying over the deploy files
@@ -14,3 +11,5 @@ SLACKBOT:
 
 FINAL:
 - get api deployed
+
+![api diagram](./images/api_diagram.png)
