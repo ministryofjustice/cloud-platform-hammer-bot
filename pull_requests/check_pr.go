@@ -25,6 +25,7 @@ func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.T
 	var prStatus []InvalidChecks
 
 	for _, check := range checks.CheckRuns {
+
 		if *check.Status == "completed" {
 			prStatus = CompletedCheck(check, prStatus)
 			continue

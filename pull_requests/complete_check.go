@@ -23,5 +23,6 @@ func CompletedCheck(check *github.CheckRun, prStatus []InvalidChecks) []InvalidC
 	default:
 		prStatus = append(prStatus, InvalidChecks{*check.Name, "unaccounted for state conclusion: " + *check.Conclusion, Failure, 0})
 	}
+
 	return prStatus
 }
