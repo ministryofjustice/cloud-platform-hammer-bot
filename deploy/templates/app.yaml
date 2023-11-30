@@ -24,16 +24,11 @@ spec:
                 port: 3000
               initialDelaySeconds: 2
           env:
-            - name: API_KEY
+            - name: GITHUB_TOKEN
               valueFrom:
                 secretKeyRef:
-                  name: go-get-module-api-key
-                  key: api_key
-            - name: REDIS_ADDR
-              valueFrom:
-                configMapKeyRef:
-                  name: redis-config
-                  key: redis-master-addr
+                  name: github-token
+                  key: github-token
             - name: GIN_MODE
               value: "release"
                     
