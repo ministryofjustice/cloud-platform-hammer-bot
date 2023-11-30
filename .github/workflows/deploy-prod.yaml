@@ -1,0 +1,38 @@
+name: Build and push a new production release
+
+on:
+  push:
+    tags:
+      - '[0-9]+.[0-9]+.[0-9]+'
+
+permissions:
+  contents: write
+
+
+jobs:
+  build-and-push:
+    uses: ./.github/workflows/build-and-push-workflow.yaml
+    permissions:
+      id-token: write # This is required for requesting the JWT
+      contents: read  # This is required for actions/checkout
+    with:
+      env: production
+      image_tag: ${{ github.ref_name }}
+      ecr_repo: webops/cloud-platform-hammer-bot-ecr
+      aws_region: eu-west-2
+    secrets:
+      ecr_role_to_assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
+
+  deploy:
+    needs: build-and-push
+    uses: ./.github/workflows/deploy-workflow.yaml
+    with:
+      env: production
+      image_tag: ${{ github.ref_name }}
+    secrets:
+      kube_namespace: "${{ secrets.KUBE_NAMESPACE }}"
+      kube_cert: "${{ secrets.KUBE_CERT }}"
+      kube_cluster: "https://${{ secrets.KUBE_CLUSTER }}"
+      kube_token: "${{ secrets.KUBE_TOKEN }}"
+      ecr_url: "${{ needs.build-and-push.outputs.REGISTRY }}/webops/cloud-platform-hammer-bot-ecr"
+

@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      name: api
+  template:
+    metadata:
+      labels:
+        name: api
+    spec:
+      containers:
+        - name: application
+          image: '{{ .Values.ecrUrl }}:{{ .Values.imageTag }}'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          readinessProbe:
+              httpGet:
+                path: /healthz
+                port: 3000
+              initialDelaySeconds: 2
+          env:
+            - name: API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: go-get-module-api-key
+                  key: api_key
+            - name: REDIS_ADDR
+              valueFrom:
+                configMapKeyRef:
+                  name: redis-config
+                  key: redis-master-addr
+            - name: GIN_MODE
+              value: "release"
+                    

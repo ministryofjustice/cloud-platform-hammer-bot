@@ -1,0 +1,90 @@
+name: Deploy
+
+on:
+  workflow_call:
+    inputs:
+      env:
+        description: 'which environment to deploy to'
+        required: true
+        type: string
+      image_tag:
+        description: 'the tag to deploy'
+        type: string
+        required: true
+    secrets:
+      kube_namespace:
+        description: 'the kubernetes namespace to deploy to'
+        required: true
+      kube_cert:
+        description: 'cert used to verify identity to cluster'
+        required: true
+      kube_cluster:
+        description: 'address of the cluster to connect to'
+        required: true
+      kube_token:
+        description: 'used to authenticate to the cluster'
+        required: true
+      ecr_url:
+        description: 'the url for the ecr repo, where the image is pulled from'
+        required: true
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: ${{ inputs.env }}
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v4
+
+        - name: Set cluster
+          id: set-cluster
+          shell: bash
+          run: |
+            if [ "${{ inputs.env }}" == "development" ]
+            then
+              echo "CLUSTER=live-2" >> $GITHUB_OUTPUT
+              echo "INGRESS_COLOUR=blue" >> $GITHUB_OUTPUT
+            elif [ ${{ inputs.env }} == "production" ]
+            then
+              echo "CLUSTER=live" >> $GITHUB_OUTPUT
+              echo "INGRESS_COLOUR=green" >> $GITHUB_OUTPUT
+            fi
+
+        - name: Create cert certificate-authority
+          id: create-cert-authority
+          shell: bash
+          run: echo "${{ secrets.kube_cert }}" > ca.crt
+
+        - name: Authenticate to the cluster
+          shell: bash
+          id: authenticate
+          env:
+            KUBE_CLUSTER: ${{ secrets.kube_cluster }}
+          run: |
+            kubectl config set-cluster "${KUBE_CLUSTER}" --certificate-authority=ca.crt --server="${KUBE_CLUSTER}"
+            kubectl config set-credentials deploy-user --token="${{ secrets.kube_token }}"
+            kubectl config set-context "${KUBE_CLUSTER}" --cluster="${KUBE_CLUSTER}" --user=deploy-user --namespace="${{ secrets.kube_namespace }}"
+            kubectl config use-context "${KUBE_CLUSTER}"
+
+            # export flat kube config so helm image can read it
+            echo 'FLAT_KUBE_CONFIG<<EOF' >> $GITHUB_ENV
+            kubectl config view --flatten >> $GITHUB_ENV
+            echo 'EOF' >> $GITHUB_ENV
+
+        - name: Deploy image to K8 cloud-platform-hammer-bot (${{ inputs.env }}) namespace
+          id: deploy-image
+          uses: vimeda/helm@v1.7.0
+          with:
+            release: hammer-bot
+            namespace: ${{ secrets.kube_namespace }}
+            chart: deploy
+            values: |
+              ecrUrl: ${{ secrets.ecr_url }}
+              imageTag: ${{ inputs.image_tag }}
+              cluster: ${{ steps.set-cluster.outputs.CLUSTER }}
+              ingressIdentifier: api-${{ secrets.kube_namespace }}-${{ steps.set-cluster.outputs.INGRESS_COLOUR }}
+              namespace: ${{ secrets.kube_namespace }}
+          env:
+            KUBECONFIG_FILE: ${{ env.FLAT_KUBE_CONFIG }}
+
+

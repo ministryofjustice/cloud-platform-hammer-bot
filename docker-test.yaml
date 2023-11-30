@@ -1,0 +1,10 @@
+schemaVersion: "2.0.0"
+fileExistenceTests:
+  - name: "cloud-platform-hammer-bot api binary"
+    path: "/app/main"
+    shouldExist: true
+  - name: "cloud-platform-hammer-bot ca cert"
+    path: "/etc/ssl/certs/ca-certificates.crt"
+    shouldExist: true
+
+
