@@ -4,12 +4,11 @@ TODO:
 
 AFTER:
 - we should also think about in the future pushing an empty commit to retrigger the check (separate api route)
-- prep deploy by copying over the deploy files
 
 SLACKBOT:
-- final step call the api from the slackbot and then post relevant emojis and if a check is queued for a long time this is probably concourse stuck so we should fire off another call to the api to push an empty commit
+- final step call the api from the slackbot and then post relevant emojis
 
 FINAL:
-- get api deployed
+- get api deployed including new namespace in environments
 
 ![api diagram](./images/api_diagram.png)
