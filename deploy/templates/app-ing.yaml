@@ -8,9 +8,9 @@ metadata:
 spec:
   tls:
     - hosts:
-        - modules.apps.{{ .Values.cluster }}.cloud-platform.service.justice.gov.uk
+        - hammer-bot.{{ .Values.cluster }}.cloud-platform.service.justice.gov.uk
   rules:
-    - host: modules.apps.{{ .Values.cluster }}.cloud-platform.service.justice.gov.uk
+    - host: hammer-bot.{{ .Values.cluster }}.cloud-platform.service.justice.gov.uk
       http:
         paths:
           - path: /

@@ -14,8 +14,6 @@ SLACKBOT:
 3. for each pr number call the api
 4. collate the responses
 5. based on the responses apply relevant emojis
-
-FINAL:
-- get api deployed including new namespace in environments
+6. if the checks are still pending then retry based on the retryIn field from the api
 
 ![api diagram](./images/api_diagram.png)
