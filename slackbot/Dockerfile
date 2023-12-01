@@ -2,9 +2,9 @@ FROM node:20.10-alpine
 
 WORKDIR /usr/src/app
 
-COPY package*.json  .
+COPY slackbot/package*.json  .
 
-COPY app.js .
+COPY slackbot/app.js .
 
 RUN npm i
 
