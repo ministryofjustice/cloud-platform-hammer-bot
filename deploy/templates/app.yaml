@@ -54,19 +54,19 @@ spec:
           ports:
             - containerPort: 3000
           env:
-            - name: SLACK_APP_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: slack-app-token
-                  key: slack-app-token
-            - name: SLACK_SIGNING_SECRET
-              valueFrom:
-                secretKeyRef:
-                  name: slack-signing-token
-                  key: slack-signing-token
-            - name: SLACK_BOT_TOKEN
-              valueFrom:
-                secretKeyRef:
-                  name: slack-bot-token
-                  key: slack-bot-token
+            # - name: SLACK_APP_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: slack-app-token
+            #       key: slack-app-token
+            # - name: SLACK_SIGNING_SECRET
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: slack-signing-token
+            #       key: slack-signing-token
+            # - name: SLACK_BOT_TOKEN
+            #   valueFrom:
+            #     secretKeyRef:
+            #       name: slack-bot-token
+            #       key: slack-bot-token
 
