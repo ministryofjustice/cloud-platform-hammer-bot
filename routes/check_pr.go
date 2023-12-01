@@ -1,9 +1,7 @@
 package routes
 
 import (
-	"log"
 	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -17,16 +15,7 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 	r.GET("/check-pr/:pr-number", func(c *gin.Context) {
 		prNumber := c.Param("pr-number")
 
-		// grab the latest sha for a pr
-		s, _ := strconv.Atoi(prNumber)
-		pr, _, _ := ghClient.PullRequests.Get(c, "ministryofjustice", "cloud-platform-environments", s)
-
-		status, _, _ := ghClient.Repositories.GetCombinedStatus(c, "ministryofjustice", "cloud-platform-environments", "refs/pull/"+prNumber+"/head", &github.ListOptions{})
-
-		// TODO: map the output of GetCombinedStatus into the InvalidChecks struct, then append to the return data of CheckPRStatus
-
-		log.Println("pr", pr.GetUpdatedAt()) // use this to generate a retryin value
-		log.Println("status", status)
+		statuses, _, _ := ghClient.Repositories.GetCombinedStatus(c, "ministryofjustice", "cloud-platform-environments", "refs/pull/"+prNumber+"/head", &github.ListOptions{})
 
 		checks, resp, ghErr := ghClient.Checks.ListCheckRunsForRef(c, "ministryofjustice", "cloud-platform-environments", "refs/pull/"+prNumber+"/head", &github.ListCheckRunsOptions{Filter: github.String("all")})
 		// checks, resp, ghErr := ghClient.Checks.ListCheckRunsForRef(c, "ministryofjustice", "cloud-platform-environments", *pr.GetHead().SHA, &github.ListCheckRunsOptions{Filter: github.String("all")})
@@ -39,7 +28,10 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 			utils.SendResponse(c, obj)
 		}
 
+		combinedStatus := pull_requests.CheckCombinedStatus(c, ghClient, statuses, prNumber, time.Since)
 		data := pull_requests.CheckPRStatus(checks, time.Since)
+
+		data = append(data, combinedStatus...)
 
 		obj := utils.Response{
 			Status: http.StatusOK,
