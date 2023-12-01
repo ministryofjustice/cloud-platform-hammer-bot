@@ -51,6 +51,18 @@ func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.T
 func CheckCombinedStatus(c *gin.Context, ghClient *github.Client, status *github.CombinedStatus, prNumber string, getTimeSince func(time.Time) time.Duration) []InvalidChecks {
 	var statuses []InvalidChecks
 
+	if status.GetState() == "pending" {
+		prInt, _ := strconv.Atoi(prNumber)
+		pr, _, _ := ghClient.PullRequests.Get(c, "ministryofjustice", "cloud-platform-environments", prInt)
+		youngerThan10Mins, timeSinceStart, tenMins := utils.TimeSince(pr.GetUpdatedAt(), getTimeSince)
+
+		if youngerThan10Mins {
+			statuses = append(statuses, InvalidChecks{"concourse-ci/status", "this check has been pending for less than 10 minutes, check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart}) // need to calculate the retry in nanoseconds
+		} else if !youngerThan10Mins {
+			statuses = append(statuses, InvalidChecks{"concourse-ci/status", "this check has been pending for at least 10 minutes, looks like something has gone wrong", Pending, 0})
+		}
+	}
+
 	for _, s := range status.Statuses {
 		if s.GetState() == "failure" {
 			statuses = append(statuses, InvalidChecks{s.GetContext(), "this check failed, check your pr and ammend", Failure, 0})
@@ -61,18 +73,6 @@ func CheckCombinedStatus(c *gin.Context, ghClient *github.Client, status *github
 			continue
 		}
 
-		if s.GetState() == "pending" {
-			prInt, _ := strconv.Atoi(prNumber)
-			pr, _, _ := ghClient.PullRequests.Get(c, "ministryofjustice", "cloud-platform-environments", prInt)
-			youngerThan10Mins, timeSinceStart, tenMins := utils.TimeSince(pr.GetUpdatedAt(), getTimeSince)
-
-			if youngerThan10Mins {
-				statuses = append(statuses, InvalidChecks{s.GetContext(), "this check has been pending for less than 10 minutes, check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart}) // need to calculate the retry in nanoseconds
-			} else if !youngerThan10Mins {
-				statuses = append(statuses, InvalidChecks{s.GetContext(), "this check has been pending for at least 10 minutes, looks like something has gone wrong", Pending, 0})
-			}
-			continue
-		}
 	}
 
 	return statuses
