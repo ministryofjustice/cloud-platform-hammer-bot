@@ -1,7 +1,7 @@
-FROM node:20.10-alpine
+FROM node:20.10-alpine3.17
 
-RUN addgroup -g 1000 -S appgroup && \
-  adduser -u 1000 -S appuser -G appgroup
+RUN addgroup -g 1001 -S appgroup && \
+  adduser -u 1001 -S appuser -G appgroup
 
 WORKDIR /usr/src/app
 
