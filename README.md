@@ -18,3 +18,5 @@ SLACKBOT:
 6. if the checks are still pending then retry based on the retryIn field from the api
 
 ![api diagram](./images/api_diagram.png)
+![Go diagram](./images/go_diagram.png)
+
