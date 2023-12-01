@@ -69,6 +69,4 @@ spec:
                 secretKeyRef:
                   name: slack-bot-token
                   key: slack-bot-token
-            - name: PORT
-              value: 3000
-                    
+
