@@ -7,6 +7,9 @@ on:
         description: 'which environment to deploy to'
         required: true
         type: string
+      slackbot_image_tag:
+        description: 'what to tag the image with'
+        type: string
       image_tag:
         description: 'what to tag the image with'
         type: string
@@ -37,6 +40,7 @@ jobs:
       id-token: write # This is required for requesting the JWT
       contents: read  # This is required for actions/checkout
     outputs:
+      SLACKBOT_IMAGE_TAG: ${{ steps.build-image.outputs.SLACKBOT_IMAGE_TAG }}
       IMAGE_TAG: ${{ steps.build-image.outputs.IMAGE_TAG }}
       REGISTRY: ${{ steps.login-ecr.outputs.registry }}
     steps:
@@ -63,7 +67,11 @@ jobs:
         env:
           ECR_REPO: ${{ inputs.ecr_repo }}
           IMAGE_TAG: ${{ inputs.image_tag }}
+          SLACKBOT_IMAGE_TAG: ${{ inputs.slackbot_image_tag }}
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         run: |
+          docker build -t $REGISTRY/$ECR_REPO:$SLACKBOT_IMAGE_TAG -f slackbot/Dockerfile .
+          docker push $REGISTRY/$ECR_REPO:$SLACKBOT_IMAGE_TAG
+
           docker build -t $REGISTRY/$ECR_REPO:$IMAGE_TAG .
           docker push $REGISTRY/$ECR_REPO:$IMAGE_TAG

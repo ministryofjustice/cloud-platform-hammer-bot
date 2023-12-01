@@ -7,8 +7,12 @@ on:
         description: 'which environment to deploy to'
         required: true
         type: string
+      slackbot_image_tag:
+        description: 'the slackbot tag to deploy'
+        type: string
+        required: true
       image_tag:
-        description: 'the tag to deploy'
+        description: 'the app tag to deploy'
         type: string
         required: true
     secrets:
@@ -40,15 +44,8 @@ jobs:
           id: set-cluster
           shell: bash
           run: |
-            if [ "${{ inputs.env }}" == "development" ]
-            then
-              echo "CLUSTER=live-2" >> $GITHUB_OUTPUT
-              echo "INGRESS_COLOUR=blue" >> $GITHUB_OUTPUT
-            elif [ ${{ inputs.env }} == "production" ]
-            then
               echo "CLUSTER=live" >> $GITHUB_OUTPUT
               echo "INGRESS_COLOUR=green" >> $GITHUB_OUTPUT
-            fi
 
         - name: Create cert certificate-authority
           id: create-cert-authority
@@ -81,6 +78,7 @@ jobs:
             values: |
               ecrUrl: ${{ secrets.ecr_url }}
               imageTag: ${{ inputs.image_tag }}
+              slackbotImageTag: ${{ inputs.slackbot_image_tag }}
               cluster: ${{ steps.set-cluster.outputs.CLUSTER }}
               ingressIdentifier: api-${{ secrets.kube_namespace }}-${{ steps.set-cluster.outputs.INGRESS_COLOUR }}
               namespace: ${{ secrets.kube_namespace }}

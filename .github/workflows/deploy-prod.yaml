@@ -17,6 +17,7 @@ jobs:
       contents: read  # This is required for actions/checkout
     with:
       env: production
+      slackbot_image_tag: slackbot_${{ github.ref_name }}
       image_tag: ${{ github.ref_name }}
       ecr_repo: webops/cloud-platform-hammer-bot-ecr
       aws_region: eu-west-2
@@ -29,6 +30,7 @@ jobs:
     with:
       env: production
       image_tag: ${{ github.ref_name }}
+      slackbot_image_tag: slackbot_${{ github.ref_name }}
     secrets:
       kube_namespace: "${{ secrets.KUBE_NAMESPACE }}"
       kube_cert: "${{ secrets.KUBE_CERT }}"

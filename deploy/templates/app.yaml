@@ -31,4 +31,44 @@ spec:
                   key: github-token
             - name: GIN_MODE
               value: "release"
+---
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: slackbot
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: slackbot
+  template:
+    metadata:
+      labels:
+        name: slackbot
+    spec:
+      containers:
+        - name: application
+          image: '{{ .Values.ecrUrl }}:{{ .Values.slackbotImageTag }}'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 3000
+          env:
+            - name: SLACK_APP_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-app-token
+                  key: slack-app-token
+            - name: SLACK_SIGNING_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: slack-signing-token
+                  key: slack-signing-token
+            - name: SLACK_BOT_TOKEN
+              valueFrom:
+                secretKeyRef:
+                  name: slack-bot-token
+                  key: slack-bot-token
+            - name: PORT
+              value: 3000
                     

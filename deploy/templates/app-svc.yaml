@@ -11,3 +11,20 @@ spec:
       targetPort: 3000
   selector:
     name: api
+
+---
+
+apiVersion: v1
+kind: Service
+metadata:
+  name: slackbot
+  labels:
+    app: slackbot
+spec:
+  ports:
+    - name: http
+      port: 3000
+      targetPort: 3000
+  selector:
+    name: slackbot
+
