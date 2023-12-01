@@ -8,13 +8,31 @@ import (
 	"github.com/google/go-github/github"
 )
 
+func mockCheckPendingFnOld() InvalidChecks {
+	return InvalidChecks{
+		"concourse-ci/status",
+		"this check has been pending for at least 10 minutes, looks like something has gone wrong",
+		2,
+		0,
+	}
+}
+
+func mockCheckPendingFnRecent() InvalidChecks {
+	return InvalidChecks{
+		"concourse-ci/status",
+		"this check has been pending for less than 10 minutes, check back again in 8",
+		2,
+		999,
+	}
+}
+
 func wrapTimeSince(mins int64) func(time.Time) time.Duration {
 	return func(time.Time) time.Duration {
 		return time.Duration(mins) * time.Minute
 	}
 }
 
-func TestCheckInvalidChecks(t *testing.T) {
+func TestCheckPRStatus(t *testing.T) {
 	tenMins := time.Duration(10 * time.Minute)
 	inProgressTime := time.Now().Add(-9 * time.Minute)
 	mockRetryInNanoSecShort := tenMins - wrapTimeSince(9)(inProgressTime)
@@ -306,6 +324,88 @@ func TestCheckInvalidChecks(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			if got := CheckPRStatus(tt.args.checks, tt.args.getTimeSince); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("CheckPRStatus() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestCheckCombinedStatus(t *testing.T) {
+	var emptyInvalid []InvalidChecks
+
+	type args struct {
+		status         *github.CombinedStatus
+		checkPendingFn func() InvalidChecks
+	}
+	tests := []struct {
+		name string
+		args args
+		want []InvalidChecks
+	}{
+		{
+			"successful status checks",
+			args{
+				&github.CombinedStatus{
+					Statuses: []github.RepoStatus{{
+						State: github.String("success"),
+					}},
+				},
+				func() InvalidChecks { return InvalidChecks{} },
+			},
+			emptyInvalid,
+		},
+		{
+			"failure status checks",
+			args{
+				&github.CombinedStatus{
+					Statuses: []github.RepoStatus{{
+						State:   github.String("failure"),
+						Context: github.String("concourse-ci/status"),
+					}},
+				},
+				func() InvalidChecks { return InvalidChecks{} },
+			},
+			[]InvalidChecks{{
+				"concourse-ci/status",
+				"this check failed, check your pr and amend",
+				1,
+				0,
+			}},
+		},
+		{
+			"old pending status checks",
+			args{
+				&github.CombinedStatus{
+					State: github.String("pending"),
+				},
+				mockCheckPendingFnOld,
+			},
+			[]InvalidChecks{{
+				"concourse-ci/status",
+				"this check has been pending for at least 10 minutes, looks like something has gone wrong",
+				2,
+				0,
+			}},
+		},
+		{
+			"recent pending status checks",
+			args{
+				&github.CombinedStatus{
+					State: github.String("pending"),
+				},
+				mockCheckPendingFnRecent,
+			},
+			[]InvalidChecks{{
+				"concourse-ci/status",
+				"this check has been pending for less than 10 minutes, check back again in 8",
+				2,
+				999,
+			}},
+		},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := CheckCombinedStatus(tt.args.status, tt.args.checkPendingFn); !reflect.DeepEqual(got, tt.want) {
+				t.Errorf("CheckCombinedStatus() = %v, want %v", got, tt.want)
 			}
 		})
 	}

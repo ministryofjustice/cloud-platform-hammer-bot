@@ -48,31 +48,41 @@ func CheckPRStatus(checks *github.ListCheckRunsResults, getTimeSince func(time.T
 	return prStatus
 }
 
-func CheckCombinedStatus(c *gin.Context, ghClient *github.Client, status *github.CombinedStatus, prNumber string, getTimeSince func(time.Time) time.Duration) []InvalidChecks {
-	var statuses []InvalidChecks
+func CheckPendingStatus(c *gin.Context, ghClient *github.Client, prNumber string, getTimeSince func(time.Time) time.Duration) (func() InvalidChecks, *github.Response, error) {
+	prInt, _ := strconv.Atoi(prNumber)
+	pr, resp, ghErr := ghClient.PullRequests.Get(c, "ministryofjustice", "cloud-platform-environments", prInt)
+	if ghErr != nil {
+		return nil, resp, ghErr
+	}
 
-	if status.GetState() == "pending" {
-		prInt, _ := strconv.Atoi(prNumber)
-		pr, _, _ := ghClient.PullRequests.Get(c, "ministryofjustice", "cloud-platform-environments", prInt)
+	return func() InvalidChecks {
 		youngerThan10Mins, timeSinceStart, tenMins := utils.TimeSince(pr.GetUpdatedAt(), getTimeSince)
 
 		if youngerThan10Mins {
-			statuses = append(statuses, InvalidChecks{"concourse-ci/status", "this check has been pending for less than 10 minutes, check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart}) // need to calculate the retry in nanoseconds
-		} else if !youngerThan10Mins {
-			statuses = append(statuses, InvalidChecks{"concourse-ci/status", "this check has been pending for at least 10 minutes, looks like something has gone wrong", Pending, 0})
+			return InvalidChecks{"concourse-ci/status", "this check has been pending for less than 10 minutes, check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart} // need to calculate the retry in nanoseconds
+		} else {
+			return InvalidChecks{"concourse-ci/status", "this check has been pending for at least 10 minutes, looks like something has gone wrong", Pending, 0}
 		}
+	}, nil, nil
+}
+
+func CheckCombinedStatus(status *github.CombinedStatus, checkPendingFn func() InvalidChecks) []InvalidChecks {
+	var statuses []InvalidChecks
+
+	if status.GetState() == "pending" {
+		pendingStatus := checkPendingFn()
+		statuses = append(statuses, pendingStatus)
 	}
 
 	for _, s := range status.Statuses {
 		if s.GetState() == "failure" {
-			statuses = append(statuses, InvalidChecks{s.GetContext(), "this check failed, check your pr and ammend", Failure, 0})
+			statuses = append(statuses, InvalidChecks{s.GetContext(), "this check failed, check your pr and amend", Failure, 0})
 			continue
 		}
 
 		if s.GetState() == "success" {
 			continue
 		}
-
 	}
 
 	return statuses
