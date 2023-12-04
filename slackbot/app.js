@@ -21,9 +21,9 @@ const getStatus = async (ids) => {
   return await response.json();
 }
 
-const postSuccess = async (data) => {
+const postSuccess = async (data, ts) => {
   if (data === null || data.length === 0) {
-    await addEmoji("sparkles")
+    await addEmoji("sparkles", ts)
     return true
   }
   return false
@@ -42,27 +42,26 @@ const addEmoji = async (emoji, ts) => {
     channel: "C05EG79V8HW",
     timestamp: ts
   })
-
 }
 
-const postFail = async (data) => {
+const postFail = async (data, ts) => {
   const failed = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 1) : false)
 
   if (failed) {
-    await addEmoji("x")
+    await addEmoji("x", ts)
     return true
   }
   return false
 }
 
-const postReaction = async (data) => {
-  const isSuccess = await postSuccess(data)
+const postReaction = async (data, ts) => {
+  const isSuccess = await postSuccess(data, ts)
 
   if (isSuccess) {
     return true
   }
 
-  const isFailed = await postFail(data)
+  const isFailed = await postFail(data, ts)
 
   if (isFailed) {
     return true
@@ -89,7 +88,7 @@ const postPendingRecnt = async (data) => {
     setTimeout(async () => {
       const data = await getStatus(pendingRecent.Id)
 
-      const result = postReaction(data)
+      const result = postReaction(data, message.ts)
 
       await removeEmoji("repeat", message.ts)
 
