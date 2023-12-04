@@ -48,7 +48,7 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
     return
   }
 
-  const pendingRecent = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryIn > 0) : false)
+  const pendingRecent = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec > 0) : false)
 
   if (pendingRecent) {
     await app.client.reactions.add({
@@ -64,7 +64,7 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
     // }, pendingRecent.RetryIn * 1000)
   }
 
-  const pendingOlderThan10Mins = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryIn === 0) : false)
+  const pendingOlderThan10Mins = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec === 0) : false)
 
   if (pendingOlderThan10Mins) {
     await app.client.reactions.add({
