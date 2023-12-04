@@ -3,7 +3,7 @@ import fetch from 'node-fetch';
 
 const NANO_SECOND = 1000000000
 
-const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammerp-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
+const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammer-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
 
 // Initializes your app with your bot token and signing secret
 const app = new App.App({
