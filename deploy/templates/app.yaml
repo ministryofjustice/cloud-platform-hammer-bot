@@ -62,8 +62,8 @@ spec:
             - name: SLACK_SIGNING_SECRET
               valueFrom:
                 secretKeyRef:
-                  name: slack-signing-token
-                  key: slack-signing-token
+                  name: slack-signing-secret
+                  key: slack-signing-secret
             - name: SLACK_BOT_TOKEN
               valueFrom:
                 secretKeyRef:
