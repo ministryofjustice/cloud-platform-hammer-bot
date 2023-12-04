@@ -79,26 +79,26 @@ const postReply = async (message, ts) => {
   })
 }
 
-const postPendingRecnt = async (data) => {
+const postPendingRecnt = async (data, ts) => {
   const pendingRecent = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec > 0) : false)
 
   if (pendingRecent) {
-    await addEmoji("repeat", message.ts)
+    await addEmoji("repeat", ts)
 
     setTimeout(async () => {
       const data = await getStatus(pendingRecent.Id)
 
-      const result = postReaction(data, message.ts)
+      const result = postReaction(data, ts)
 
-      await removeEmoji("repeat", message.ts)
+      await removeEmoji("repeat", ts)
 
       if (result) {
         return true
       }
 
-      await postReply("It looks like checks on your pr are _still_ pending even after waiting a while. A Cloud Platform team member will come and take a look.", message.ts)
-      await addEmoji("hourglass_flowing_sand", message.ts)
-      await addEmoji("warning", message.ts)
+      await postReply("It looks like checks on your pr are _still_ pending even after waiting a while. A Cloud Platform team member will come and take a look.", ts)
+      await addEmoji("hourglass_flowing_sand", ts)
+      await addEmoji("warning", ts)
 
     }, pendingRecent.RetryIn / NANO_SECOND + 10)
 
@@ -120,13 +120,13 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
 
   console.log(JSON.stringify(data))
 
-  const result = await postReaction(data)
+  const result = await postReaction(data, message.ts)
 
   if (result) {
     return
   }
 
-  const pendingResult = await postPendingRecnt(data)
+  const pendingResult = await postPendingRecnt(data, message.ts)
 
   if (pendingResult) {
     return
