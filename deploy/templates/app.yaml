@@ -54,6 +54,8 @@ spec:
           ports:
             - containerPort: 3000
           env:
+            - name: ENVIRONMENT
+              value: "production"
             - name: SLACK_APP_TOKEN
               valueFrom:
                 secretKeyRef:

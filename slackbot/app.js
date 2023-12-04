@@ -3,6 +3,8 @@ import fetch from 'node-fetch';
 
 const NANO_SECOND = 1000000000
 
+const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammerp-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
+
 // Initializes your app with your bot token and signing secret
 const app = new App.App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -10,11 +12,11 @@ const app = new App.App({
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN,
   port: process.env.PORT || 3000,
-  logLevel: "debug"
+  logLevel: "info"
 });
 
 const getStatus = async (ids) => {
-  const response = await fetch(`https://hammer-bot.live.cloud-platform.service.justice.gov.uk/check-pr?id=${ids}`);
+  const response = await fetch(`${API_URL}/check-pr?id=${ids}`);
 
   return await response.json();
 }
