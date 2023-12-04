@@ -11,38 +11,68 @@ const app = new App.App({
   logLevel: "debug"
 });
 
-app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', async ({ message, say }) => {
-  // say() sends a message to the channel where the event was triggered
+const getStatus = async (ids) => {
+  const response = await fetch(`https://hammer-bot.live.cloud-platform.service.justice.gov.uk/check-pr?id=${ids}`);
+
+  return await response.json();
+}
+
+app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', async ({ message }) => {
   console.log('msg', message)
 
   const pulls = message.text.match(/\d+/g);
 
-  const response = await fetch(`https://hammer-bot.live.cloud-platform.service.justice.gov.uk/check-pr?id=${pulls.join(",")}`);
+  const ids = pulls.join(",")
 
-  const data = await response.json();
+  const data = await getStatus(ids)
 
-  console.log(data)
+  console.log(JSON.stringify(data))
+
+  if (data === null || data.length === 0) {
+    await app.client.reactions.add({
+      name: "sparkle",
+      channel: "C05EG79V8HW",
+      timestamp: message.ts
+    })
+    return
+  }
 
   const failed = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 1) : false)
 
-  const pending = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2) : false)
-  // if array has failed then add failed
-  if (pending.length > 0) {
-    // if array has pending then add pending (and retry)
+  if (failed) {
+    await app.client.reactions.add({
+      name: "x",
+      channel: "C05EG79V8HW",
+      timestamp: message.ts
+    })
+    return
   }
 
-  if (failed.length > 0) {
-    app.client.reactions.add(":x:")
+  const pendingRecent = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryIn > 0) : false)
+
+  if (pendingRecent) {
+    await app.client.reactions.add({
+      name: "repeat",
+      channel: "C05EG79V8HW",
+      timestamp: message.ts
+    })
+
+    // TODO add retry here
+    // setTimeout(async () => {
+    //   await getStatus(pendingRecent.Id)
+    // }, pendingRecent.RetryIn * 1000)
   }
 
-  if (data.length === 0) {
-    app.client.reactions.add(":white_check_mark:")
-    // if array is empty then add passed
+  const pendingOlderThan10Mins = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryIn === 0) : false)
+
+  if (pendingOlderThan10Mins) {
+    await app.client.reactions.add({
+      name: "hourglass_flowing_sand",
+      channel: "C05EG79V8HW",
+      timestamp: message.ts
+    })
+    // TODO trigger empty commit and then check again in x mins
   }
-
-  console.log(data);
-  // await say(`Hey there <@${message.user}>, ${message.text.split("pull/")[1]}`);
-
 });
 
 
