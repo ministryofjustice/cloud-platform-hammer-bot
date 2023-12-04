@@ -58,6 +58,10 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 			combinedStatus := pull_requests.CheckCombinedStatus(statuses, pendingStatusFn)
 			data := pull_requests.CheckPRStatus(checks, time.Since)
 
+			if len(data) == 0 && len(combinedStatus) == 0 {
+				continue
+			}
+
 			data = append(data, combinedStatus...)
 			allPRStatuses = append(allPRStatuses, PrChecks{
 				id,

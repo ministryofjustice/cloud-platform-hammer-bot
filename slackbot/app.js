@@ -21,6 +21,25 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
 
   const data = await response.json();
 
+  console.log(data)
+
+  const failed = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 1) : false)
+
+  const pending = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2) : false)
+  // if array has failed then add failed
+  if (pending.length > 0) {
+    // if array has pending then add pending (and retry)
+  }
+
+  if (failed.length > 0) {
+    app.client.reactions.add(":x:")
+  }
+
+  if (data.length === 0) {
+    app.client.reactions.add(":white_check_mark:")
+    // if array is empty then add passed
+  }
+
   console.log(data);
   // await say(`Hey there <@${message.user}>, ${message.text.split("pull/")[1]}`);
 
