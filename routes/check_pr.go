@@ -11,12 +11,17 @@ import (
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
+type PrChecks struct {
+	ID            string `json:"Id"`
+	InvalidChecks []pull_requests.InvalidChecks
+}
+
 func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 	r.GET("/check-pr", func(c *gin.Context) {
 		ids := c.Query("id")
 		splitIds := strings.Split(ids, ",")
 
-		var allPRStatuses [][]pull_requests.InvalidChecks
+		var allPRStatuses []PrChecks
 
 		for _, id := range splitIds {
 			statuses, statusResp, ghStatusErr := ghClient.Repositories.GetCombinedStatus(c, "ministryofjustice", "cloud-platform-environments", "refs/pull/"+id+"/head", &github.ListOptions{})
@@ -54,7 +59,10 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 			data := pull_requests.CheckPRStatus(checks, time.Since)
 
 			data = append(data, combinedStatus...)
-			allPRStatuses = append(allPRStatuses, data)
+			allPRStatuses = append(allPRStatuses, PrChecks{
+				id,
+				data,
+			})
 		}
 
 		obj := utils.Response{
