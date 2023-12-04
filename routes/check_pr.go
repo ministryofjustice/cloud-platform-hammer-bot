@@ -16,6 +16,8 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 		ids := c.Query("id")
 		splitIds := strings.Split(ids, ",")
 
+		var allPRStatuses [][]pull_requests.InvalidChecks
+
 		for _, id := range splitIds {
 			statuses, statusResp, ghStatusErr := ghClient.Repositories.GetCombinedStatus(c, "ministryofjustice", "cloud-platform-environments", "refs/pull/"+id+"/head", &github.ListOptions{})
 			if ghStatusErr != nil {
@@ -52,13 +54,14 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 			data := pull_requests.CheckPRStatus(checks, time.Since)
 
 			data = append(data, combinedStatus...)
-
-			obj := utils.Response{
-				Status: http.StatusOK,
-				Data:   data,
-			}
-			utils.SendResponse(c, obj)
-			return
+			allPRStatuses = append(allPRStatuses, data)
 		}
+
+		obj := utils.Response{
+			Status: http.StatusOK,
+			Data:   allPRStatuses,
+		}
+		utils.SendResponse(c, obj)
+		return
 	})
 }
