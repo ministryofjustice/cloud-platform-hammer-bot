@@ -56,6 +56,7 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
       channel: "C05EG79V8HW",
       timestamp: message.ts
     })
+    return
 
     // TODO add retry here
     // setTimeout(async () => {
@@ -71,6 +72,8 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
       channel: "C05EG79V8HW",
       timestamp: message.ts
     })
+    return
+
     // TODO trigger empty commit and then check again in x mins
   }
 });
