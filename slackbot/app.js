@@ -3,6 +3,8 @@ import fetch from 'node-fetch';
 
 const NANO_SECOND = 1000000000
 
+const CHANNEL_ID = process.env.ENVIRONMENT === "production" ? "C05EG79V8HW" : "C05EG79V8HW" // TODO: once the app is installed in prod-slack change this to the ask channel id
+
 const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammer-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
 
 // Initializes your app with your bot token and signing secret
@@ -39,7 +41,7 @@ const removeEmoji = async (emoji, ts) => {
 const addEmoji = async (emoji, ts) => {
   return await app.client.reactions.add({
     name: emoji,
-    channel: "C05EG79V8HW",
+    channel: CHANNEL_ID,
     timestamp: ts
   })
 }
@@ -72,7 +74,7 @@ const postReaction = async (data, ts) => {
 
 const postReply = async (message, ts) => {
   return await app.client.chat.postMessage({
-    channel: "C05EG79V8HW",
+    channel: CHANNEL_ID,
     text: message,
     icon_emoji: "robot_face",
     thread_ts: ts
@@ -136,7 +138,7 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
 
   if (pendingOlderThan10Mins) {
     await addEmoji("hourglass_flowing_sand", message.ts)
-    await postReply("Looks like concourse needs a kick, plesase push an empty commit to retrigger the checks `git commit --allow-empty -m 'Empty - Commit'`", message.ts)
+    await postReply("Looks like concourse needs a kick, please push an empty commit to retrigger the checks `git commit --allow-empty -m 'Empty - Commit'`", message.ts)
     // TODO trigger empty commit and then check again in x mins
   }
 });
