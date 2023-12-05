@@ -3,6 +3,8 @@ import fetch from 'node-fetch';
 
 const NANO_SECOND = 1000000000
 
+const LOG_LEVEL = process.env.ENVIRONMENT === "production" ? "info" : "debug"
+
 const CHANNEL_ID = process.env.ENVIRONMENT === "production" ? "C05EG79V8HW" : "C05EG79V8HW" // TODO: once the app is installed in prod-slack change this to the ask channel id
 
 const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammer-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
@@ -14,7 +16,7 @@ const app = new App.App({
   socketMode: true,
   appToken: process.env.SLACK_APP_TOKEN,
   port: process.env.PORT || 3000,
-  logLevel: "info"
+  logLevel: LOG_LEVEL
 });
 
 const getStatus = async (ids) => {
@@ -34,6 +36,7 @@ const postSuccess = async (data, ts) => {
 const removeEmoji = async (emoji, ts) => {
   return await app.client.reactions.remove({
     name: emoji,
+    channel: CHANNEL_ID,
     timestamp: ts
   })
 }
@@ -81,14 +84,16 @@ const postReply = async (message, ts) => {
   })
 }
 
-const postPendingRecnt = async (data, ts) => {
-  const pendingRecent = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec > 0) : false)
+const postPendingRecent = async (data, ts, ids) => {
+  const pendingRecent = data.filter((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec > 0) : false)
 
-  if (pendingRecent) {
+  if (pendingRecent.length && pendingRecent.length > 0) {
+    const retryIn = pendingRecent.map((pr) => pr.InvalidChecks.map((check) => check.RetryInNanoSec)).flat().sort((a, b) => a - b)[0]
+
     await addEmoji("repeat", ts)
 
     setTimeout(async () => {
-      const data = await getStatus(pendingRecent.Id)
+      const data = await getStatus(ids)
 
       const result = postReaction(data, ts)
 
@@ -102,7 +107,7 @@ const postPendingRecnt = async (data, ts) => {
       await addEmoji("hourglass_flowing_sand", ts)
       await addEmoji("warning", ts)
 
-    }, pendingRecent.RetryIn / NANO_SECOND + 10)
+    }, (retryIn / NANO_SECOND) * 1000 + 10)
 
     return true
   }
@@ -128,7 +133,7 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
     return
   }
 
-  const pendingResult = await postPendingRecnt(data, message.ts)
+  const pendingResult = await postPendingRecent(data, message.ts, ids)
 
   if (pendingResult) {
     return
