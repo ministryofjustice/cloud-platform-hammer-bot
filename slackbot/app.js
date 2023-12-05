@@ -5,7 +5,7 @@ const NANO_SECOND = 1000000000
 
 const LOG_LEVEL = process.env.ENVIRONMENT === "production" ? "info" : "debug"
 
-const CHANNEL_ID = process.env.ENVIRONMENT === "production" ? "C05EG79V8HW" : "C05EG79V8HW" // TODO: once the app is installed in prod-slack change this to the ask channel id
+const CHANNEL_ID = process.env.ENVIRONMENT === "production" ? "C57UPMZLY" : "C05EG79V8HW"
 
 const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammer-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
 
