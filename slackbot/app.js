@@ -120,7 +120,7 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
 
   const pulls = message.text.match(/\/pull\/\d+/g);
 
-  const pullIds = pulls[0].split("/pull/")[1];
+  const pullIds = pulls.map((match) => match.split("/pull/")[1]);
 
   const ids = pullIds.join(",")
 
