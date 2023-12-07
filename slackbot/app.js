@@ -9,7 +9,6 @@ const CHANNEL_ID = process.env.ENVIRONMENT === "production" ? "C57UPMZLY" : "C05
 
 const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammer-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
 
-// Initializes your app with your bot token and signing secret
 const app = new App.App({
   token: process.env.SLACK_BOT_TOKEN,
   signingSecret: process.env.SLACK_SIGNING_SECRET,
@@ -50,6 +49,7 @@ const addEmoji = async (emoji, ts) => {
 }
 
 const postFail = async (data, ts) => {
+  console.log("debug fail data some error", data)
   const failed = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 1) : false)
 
   if (failed) {
@@ -115,13 +115,14 @@ const postPendingRecent = async (data, ts, ids) => {
   return false
 }
 
-
 app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', async ({ message }) => {
   console.log('msg', message)
 
-  const pulls = message.text.match(/\d+/g);
+  const pulls = message.text.match(/\/pull\/\d+/g);
 
-  const ids = pulls.join(",")
+  const pullIds = pulls.split("/pull/")[1];
+
+  const ids = pullIds.join(",")
 
   const data = await getStatus(ids)
 
