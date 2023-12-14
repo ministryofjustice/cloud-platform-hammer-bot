@@ -95,7 +95,7 @@ const postPendingRecent = async (data, ts, ids) => {
     setTimeout(async () => {
       const data = await getStatus(ids)
 
-      const result = postReaction(data, ts)
+      const result = await postReaction(data, ts)
 
       await removeEmoji("repeat", ts)
 
