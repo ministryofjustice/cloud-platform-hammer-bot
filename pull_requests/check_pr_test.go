@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v57/github"
 )
 
 func mockCheckPendingFnOld() InvalidChecks {
@@ -345,7 +345,7 @@ func TestCheckCombinedStatus(t *testing.T) {
 			"successful status checks",
 			args{
 				&github.CombinedStatus{
-					Statuses: []github.RepoStatus{{
+					Statuses: []*github.RepoStatus{{
 						State: github.String("success"),
 					}},
 				},
@@ -357,7 +357,7 @@ func TestCheckCombinedStatus(t *testing.T) {
 			"failure status checks",
 			args{
 				&github.CombinedStatus{
-					Statuses: []github.RepoStatus{{
+					Statuses: []*github.RepoStatus{{
 						State:   github.String("failure"),
 						Context: github.String("concourse-ci/status"),
 					}},

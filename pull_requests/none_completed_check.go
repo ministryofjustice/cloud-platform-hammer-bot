@@ -3,7 +3,7 @@ package pull_requests
 import (
 	"time"
 
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v57/github"
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 

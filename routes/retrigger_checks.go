@@ -4,7 +4,7 @@ import (
 	// "net/http"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v57/github"
 	// "github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
