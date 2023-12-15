@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v57/github"
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
@@ -56,7 +56,7 @@ func CheckPendingStatus(c *gin.Context, ghClient *github.Client, prNumber string
 	}
 
 	return func() InvalidChecks {
-		youngerThan10Mins, timeSinceStart, tenMins := utils.TimeSince(pr.GetUpdatedAt(), getTimeSince)
+		youngerThan10Mins, timeSinceStart, tenMins := utils.TimeSince(pr.GetUpdatedAt().Time, getTimeSince)
 
 		if youngerThan10Mins {
 			return InvalidChecks{"concourse-ci/status", "this check has been pending for less than 10 minutes, check back again in " + (tenMins - timeSinceStart).String(), Pending, tenMins - timeSinceStart} // need to calculate the retry in nanoseconds

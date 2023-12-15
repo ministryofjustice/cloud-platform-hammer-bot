@@ -5,7 +5,7 @@ go 1.21.0
 require (
 	github.com/gin-contrib/zap v0.2.0
 	github.com/gin-gonic/gin v1.9.1
-	github.com/google/go-github v17.0.0+incompatible
+	github.com/google/go-github/v57 v57.0.0
 	github.com/stretchr/testify v1.8.4
 	go.uber.org/zap v1.26.0
 	golang.org/x/oauth2 v0.12.0

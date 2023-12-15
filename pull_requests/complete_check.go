@@ -1,7 +1,7 @@
 package pull_requests
 
 import (
-	"github.com/google/go-github/github"
+	"github.com/google/go-github/v57/github"
 )
 
 func CompletedCheck(check *github.CheckRun, prStatus []InvalidChecks) []InvalidChecks {
