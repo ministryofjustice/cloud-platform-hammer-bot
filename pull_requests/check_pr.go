@@ -1,6 +1,7 @@
 package pull_requests
 
 import (
+	"context"
 	"strconv"
 	"time"
 
@@ -86,4 +87,10 @@ func CheckCombinedStatus(status *github.CombinedStatus, checkPendingFn func() In
 	}
 
 	return statuses
+}
+
+func GetBranch(ghClient *github.Client, owner, repository, prNumber string) string {
+	prInt, _ := strconv.Atoi(prNumber)
+	pr, _, _ := ghClient.PullRequests.Get(context.Background(), "ministryofjustice", "cloud-platform-environments", prInt)
+	return pr.GetBase().GetRef()
 }

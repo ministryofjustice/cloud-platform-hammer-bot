@@ -11,8 +11,14 @@ import (
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
+var (
+	owner      = "ministryofjustice"
+	repository = "cloud-platform-environments"
+)
+
 type PrChecks struct {
 	ID            string `json:"Id"`
+	Branch        string `json:"Branch"`
 	InvalidChecks []pull_requests.InvalidChecks
 }
 
@@ -24,7 +30,7 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 		var allPRStatuses []PrChecks
 
 		for _, id := range splitIds {
-			statuses, statusResp, ghStatusErr := ghClient.Repositories.GetCombinedStatus(c, "ministryofjustice", "cloud-platform-environments", "refs/pull/"+id+"/head", &github.ListOptions{})
+			statuses, statusResp, ghStatusErr := ghClient.Repositories.GetCombinedStatus(c, owner, repository, "refs/pull/"+id+"/head", &github.ListOptions{})
 			if ghStatusErr != nil {
 				obj := utils.Response{
 					Status: statusResp.StatusCode,
@@ -34,7 +40,7 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 				return
 			}
 
-			checks, resp, ghErr := ghClient.Checks.ListCheckRunsForRef(c, "ministryofjustice", "cloud-platform-environments", "refs/pull/"+id+"/head", &github.ListCheckRunsOptions{Filter: github.String("all")})
+			checks, resp, ghErr := ghClient.Checks.ListCheckRunsForRef(c, owner, repository, "refs/pull/"+id+"/head", &github.ListCheckRunsOptions{Filter: github.String("all")})
 
 			if ghErr != nil {
 				obj := utils.Response{
@@ -62,9 +68,11 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 				continue
 			}
 
+			branch := pull_requests.GetBranch(ghClient, owner, repository, id)
 			data = append(data, combinedStatus...)
 			allPRStatuses = append(allPRStatuses, PrChecks{
 				id,
+				branch,
 				data,
 			})
 		}

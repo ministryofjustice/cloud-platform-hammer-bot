@@ -115,6 +115,12 @@ const postPendingRecent = async (data, ts, ids) => {
   return false
 }
 
+const sendBlankCommit = async (branch) => {
+  const response = await fetch(`${API_URL}/blank_commit?branch=${branch}`);
+
+  return await response.json();
+}
+
 app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', async ({ message }) => {
   console.log('msg', message)
 
@@ -144,8 +150,10 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
 
   if (pendingOlderThan10Mins) {
     await addEmoji("hourglass_flowing_sand", message.ts)
-    await postReply("Looks like concourse needs a kick, please push an empty commit to retrigger the checks `git commit --allow-empty -m 'Empty - Commit'`", message.ts)
+    await postReply("Looks like concourse needs a kick, Hammer-Bot has pushed a blank commit to your pull request", message.ts)
     // TODO trigger empty commit and then check again in x mins
+    
+    await sendBlankCommit(data.branch)
   }
 });
 
