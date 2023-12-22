@@ -115,7 +115,7 @@ const postPendingRecent = async (data, ts, ids) => {
   return false
 }
 
-const sendBlankCommit = async (branch) => {
+const pushEmptyCommit = async (branch) => {
   const response = await fetch(`${API_URL}/retrigger-checks?branch=${branch}`);
 
   return await response.json();
