@@ -4,10 +4,11 @@ import (
 	"log"
 
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/init_app"
+	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
 func main() {
-	ginMode, ghToken := init_app.InitEnvVars()
+	ginMode, ghToken, ghURL, ghUser := init_app.InitEnvVars()
 
 	ghClient, ghErr := init_app.InitGH(ghToken)
 	if ghErr != nil {
@@ -19,7 +20,9 @@ func main() {
 		log.Fatal("Error initialising github repo: ", ghErr)
 	}
 
-	r := init_app.InitGin(ginMode, ghClient, ghRepo, ghToken)
+	var gh = utils.GitHub{Mode: ginMode, Token: ghToken, URL: ghURL, User: ghUser, Repo: ghRepo, Client: ghClient}
+
+	r := init_app.InitGin(gh)
 
 	err := r.Run(":3000")
 	if err != nil {

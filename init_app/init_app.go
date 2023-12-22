@@ -2,19 +2,19 @@ package init_app
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/go-git/go-git/v5"
-	"github.com/google/go-github/v57/github"
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/routes"
+	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
-func InitGin(ginMode string, ghClient *github.Client, ghRepo *git.Repository, ghToken string) *gin.Engine {
-	gin.SetMode(ginMode)
+func InitGin(gh utils.GitHub) *gin.Engine {
+
+	gin.SetMode(gh.Mode)
 
 	r := gin.New()
 
 	routes.InitLogger(r)
 
-	routes.InitRouter(r, ghClient, ghRepo, ghToken)
+	routes.InitRouter(r, gh)
 
 	return r
 }

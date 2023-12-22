@@ -116,7 +116,7 @@ const postPendingRecent = async (data, ts, ids) => {
 }
 
 const sendBlankCommit = async (branch) => {
-  const response = await fetch(`${API_URL}/blank_commit?branch=${branch}`);
+  const response = await fetch(`${API_URL}/retrigger-checks?branch=${branch}`);
 
   return await response.json();
 }

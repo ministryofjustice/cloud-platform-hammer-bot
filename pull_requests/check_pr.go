@@ -89,8 +89,15 @@ func CheckCombinedStatus(status *github.CombinedStatus, checkPendingFn func() In
 	return statuses
 }
 
-func GetBranch(ghClient *github.Client, owner, repository, prNumber string) string {
-	prInt, _ := strconv.Atoi(prNumber)
-	pr, _, _ := ghClient.PullRequests.Get(context.Background(), "ministryofjustice", "cloud-platform-environments", prInt)
-	return pr.GetBase().GetRef()
+func GetBranch(ghClient *github.Client, owner, repository, prNumber string) (string, error) {
+	prInt, err := strconv.Atoi(prNumber)
+	if err != nil {
+		return "", err
+	}
+
+	pr, _, err := ghClient.PullRequests.Get(context.Background(), "ministryofjustice", "cloud-platform-environments", prInt)
+	if err != nil {
+		return "", err
+	}
+	return pr.GetBase().GetRef(), nil
 }

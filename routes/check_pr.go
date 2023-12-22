@@ -68,7 +68,16 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 				continue
 			}
 
-			branch := pull_requests.GetBranch(ghClient, owner, repository, id)
+			branch, err := pull_requests.GetBranch(ghClient, owner, repository, id)
+			if err != nil {
+				obj := utils.Response{
+					Status: http.StatusInternalServerError,
+					Error:  []string{err.Error()},
+				}
+				utils.SendResponse(c, obj)
+				return
+			}
+
 			data = append(data, combinedStatus...)
 			allPRStatuses = append(allPRStatuses, PrChecks{
 				id,
@@ -82,6 +91,5 @@ func InitGetCheckPR(r *gin.Engine, ghClient *github.Client) {
 			Data:   allPRStatuses,
 		}
 		utils.SendResponse(c, obj)
-		return
 	})
 }
