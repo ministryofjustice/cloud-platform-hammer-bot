@@ -5,14 +5,15 @@ import (
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/google/go-github/v57/github"
+	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 	"go.uber.org/zap"
 
 	ginzap "github.com/gin-contrib/zap"
 )
 
-func InitRouter(r *gin.Engine, ghClient *github.Client) {
-	InitGetCheckPR(r, ghClient)
+func InitRouter(r *gin.Engine, gh utils.GitHub) {
+	InitGetCheckPR(r, gh.Client)
+	InitGetRetriggerChecks(r, gh)
 
 	r.GET("/healthz", func(c *gin.Context) {
 		c.Status(http.StatusOK)
