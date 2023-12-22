@@ -1,14 +1,11 @@
 package init_app
 
 import (
-	"os"
-
 	"github.com/go-git/go-git/v5"
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/commit"
 )
 
-func InitCommit() (*git.Repository, error) {
-	url := os.Getenv("GITHUB_URL")
+func InitCommit(url string) (*git.Repository, error) {
 	repo, err := commit.CloneRepo(url)
 	if err != nil {
 		panic(err)

@@ -1,12 +1,9 @@
 package routes
 
 import (
-	// "net/http"
-
 	"github.com/gin-gonic/gin"
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/commit"
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
-	// "github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
 func InitGetRetriggerChecks(r *gin.Engine, gh utils.GitHub) {

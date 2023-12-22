@@ -15,14 +15,14 @@ func main() {
 		log.Fatal("Error initialising github client: ", ghErr)
 	}
 
-	ghRepo, ghErr := init_app.InitCommit()
+	ghRepo, ghErr := init_app.InitCommit(ghURL)
 	if ghErr != nil {
 		log.Fatal("Error initialising github repo: ", ghErr)
 	}
 
-	var gh = utils.GitHub{Mode: ginMode, Token: ghToken, URL: ghURL, User: ghUser, Repo: ghRepo, Client: ghClient}
+	gh := utils.GitHub{Token: ghToken, URL: ghURL, User: ghUser, Repo: ghRepo, Client: ghClient}
 
-	r := init_app.InitGin(gh)
+	r := init_app.InitGin(ginMode, gh)
 
 	err := r.Run(":3000")
 	if err != nil {

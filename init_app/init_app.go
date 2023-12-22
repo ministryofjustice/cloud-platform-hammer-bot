@@ -6,9 +6,8 @@ import (
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/utils"
 )
 
-func InitGin(gh utils.GitHub) *gin.Engine {
-
-	gin.SetMode(gh.Mode)
+func InitGin(mode string, gh utils.GitHub) *gin.Engine {
+	gin.SetMode(mode)
 
 	r := gin.New()
 

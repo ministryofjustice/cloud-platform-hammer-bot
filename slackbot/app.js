@@ -84,6 +84,31 @@ const postReply = async (message, ts) => {
   })
 }
 
+const pushEmptyCommit = async (branch) => {
+  const response = await fetch(`${API_URL}/retrigger-checks/${branch}`);
+
+  return await response.json();
+}
+
+const retryLater = (ids, ts, retryInMs) => {
+  setTimeout(async () => {
+    const data = await getStatus(ids)
+
+    const result = await postReaction(data, ts)
+
+    await removeEmoji("repeat", ts)
+
+    if (result) {
+      return true
+    }
+
+    await postReply("It looks like checks on your pr are _still_ pending even after waiting a while. A Cloud Platform team member will come and take a look.", ts)
+    await addEmoji("hourglass_flowing_sand", ts)
+    await addEmoji("warning", ts)
+
+  }, retryInMs)
+}
+
 const postPendingRecent = async (data, ts, ids) => {
   const pendingRecent = data.filter((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec > 0) : false)
 
@@ -92,33 +117,12 @@ const postPendingRecent = async (data, ts, ids) => {
 
     await addEmoji("repeat", ts)
 
-    setTimeout(async () => {
-      const data = await getStatus(ids)
-
-      const result = await postReaction(data, ts)
-
-      await removeEmoji("repeat", ts)
-
-      if (result) {
-        return true
-      }
-
-      await postReply("It looks like checks on your pr are _still_ pending even after waiting a while. A Cloud Platform team member will come and take a look.", ts)
-      await addEmoji("hourglass_flowing_sand", ts)
-      await addEmoji("warning", ts)
-
-    }, (retryIn / NANO_SECOND) * 1000 + 10)
+    retryLater(ids, ts, (retryIn / NANO_SECOND) * 1000 + 10)
 
     return true
   }
 
   return false
-}
-
-const pushEmptyCommit = async (branch) => {
-  const response = await fetch(`${API_URL}/retrigger-checks?branch=${branch}`);
-
-  return await response.json();
 }
 
 app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', async ({ message }) => {
@@ -150,10 +154,13 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
 
   if (pendingOlderThan10Mins) {
     await addEmoji("hourglass_flowing_sand", message.ts)
-    await postReply("Looks like concourse needs a kick, Hammer-Bot has pushed a blank commit to your pull request", message.ts)
-    // TODO trigger empty commit and then check again in x mins
-    
-    await sendBlankCommit(data.branch)
+    await postReply("Looks like concourse needs a kick, Hammer-Bot has pushed an empty commit to your pull request", message.ts)
+
+    await pushEmptyCommit(data.branch)
+
+    await addEmoji("repeat", ts)
+
+    retryLater(ids, message.ts, 480000) // 8 mins in ms
   }
 });
 
