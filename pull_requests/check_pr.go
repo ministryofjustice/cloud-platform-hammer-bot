@@ -99,5 +99,5 @@ func GetBranch(ghClient *github.Client, owner, repository, prNumber string) (str
 	if err != nil {
 		return "", err
 	}
-	return pr.GetBase().GetRef(), nil
+	return pr.GetHead().GetRef(), nil
 }

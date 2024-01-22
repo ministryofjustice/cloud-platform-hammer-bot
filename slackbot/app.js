@@ -5,9 +5,9 @@ const NANO_SECOND = 1000000000
 
 const LOG_LEVEL = process.env.ENVIRONMENT === "production" ? "info" : "debug"
 
-const CHANNEL_ID = process.env.ENVIRONMENT === "production" ? "C57UPMZLY" : "C05EG79V8HW"
+const CHANNEL_ID = process.env.ENVIRONMENT === "production" ? "C57UPMZLY" : "C06EH6AR7DH"
 
-const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammer-bot.svc.cluster.local:3001" : "https://hammer-bot.live.cloud-platform.service.justice.gov.uk"
+const API_URL = process.env.ENVIRONMENT === "production" ? "http://api.cloud-platform-hammer-bot.svc.cluster.local:3001" : "http://localhost:3000"
 
 const app = new App.App({
   token: process.env.SLACK_BOT_TOKEN,
@@ -20,6 +20,12 @@ const app = new App.App({
 
 const getStatus = async (ids) => {
   const response = await fetch(`${API_URL}/check-pr?id=${ids}`);
+
+  return await response.json();
+}
+
+const pushEmptyCommit = async (branch) => {
+  const response = await fetch(`${API_URL}/retrigger-checks?branch=${branch}`);
 
   return await response.json();
 }
@@ -84,19 +90,13 @@ const postReply = async (message, ts) => {
   })
 }
 
-const pushEmptyCommit = async (branch) => {
-  const response = await fetch(`${API_URL}/retrigger-checks/${branch}`);
-
-  return await response.json();
-}
-
 const retryLater = (ids, ts, retryInMs) => {
   setTimeout(async () => {
     const data = await getStatus(ids)
 
     const result = await postReaction(data, ts)
 
-    await removeEmoji("repeat", ts)
+    await removeEmoji("spinning-circle-of-death", ts)
 
     if (result) {
       return true
@@ -115,7 +115,7 @@ const postPendingRecent = async (data, ts, ids) => {
   if (pendingRecent.length && pendingRecent.length > 0) {
     const retryIn = pendingRecent.map((pr) => pr.InvalidChecks.map((check) => check.RetryInNanoSec)).flat().sort((a, b) => a - b)[0]
 
-    await addEmoji("repeat", ts)
+    await addEmoji("spinning-circle-of-death", ts)
 
     retryLater(ids, ts, (retryIn / NANO_SECOND) * 1000 + 10)
 
@@ -156,9 +156,12 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
     await addEmoji("hourglass_flowing_sand", message.ts)
     await postReply("Looks like concourse needs a kick, Hammer-Bot has pushed an empty commit to your pull request", message.ts)
 
-    await pushEmptyCommit(data.branch)
+    const branch = data.map((pr) => pr.Branch).join(",")
+    console.log("branch", branch)
 
-    await addEmoji("repeat", ts)
+    await pushEmptyCommit(branch)
+    await removeEmoji("hourglass_flowing_sand", message.ts)
+    await addEmoji("spinning-circle-of-death", message.ts)
 
     retryLater(ids, message.ts, 480000) // 8 mins in ms
   }

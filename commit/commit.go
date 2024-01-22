@@ -9,9 +9,15 @@ import (
 	"github.com/go-git/go-git/v5/plumbing/transport/http"
 )
 
-func CloneRepo(url string) (*git.Repository, error) {
+func CloneRepo(url, user, token string) (*git.Repository, error) {
+	auth := &http.BasicAuth{
+		Username: user,
+		Password: token,
+	}
+
 	r, err := git.PlainClone("/app/environments", false, &git.CloneOptions{
 		URL:      url,
+		Auth:     auth,
 		Progress: nil,
 	})
 	if err != nil {
@@ -36,7 +42,7 @@ func FetchBranch(r *git.Repository, branch string) error {
 		Progress:   nil,
 		RefSpecs:   []config.RefSpec{config.RefSpec(ref)},
 	})
-	if err != nil {
+	if err != git.NoErrAlreadyUpToDate {
 		return fmt.Errorf("an error occurred at fetch: %v", err)
 	}
 	return nil
@@ -90,5 +96,30 @@ func PushCommit(r *git.Repository, user, token, branch string) error {
 	if err != nil {
 		return fmt.Errorf("an error occurred at push: %v", err)
 	}
+	return nil
+}
+
+// switch back to main branch
+func SwitchToMainBranch(r *git.Repository) error {
+	w, err := r.Worktree()
+	if err != nil {
+		fmt.Println(err)
+	}
+	err = w.Checkout(&git.CheckoutOptions{
+		Branch: plumbing.NewBranchReferenceName("main"),
+		Force:  true,
+	})
+	if err != nil {
+		return fmt.Errorf("an error occurred at checkout: %v", err)
+	}
+
+	err = w.Pull(&git.PullOptions{
+		RemoteName: "origin",
+		Progress:   nil,
+	})
+	if err != git.NoErrAlreadyUpToDate {
+		return fmt.Errorf("an error occurred at fetch: %v", err)
+	}
+
 	return nil
 }

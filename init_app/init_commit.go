@@ -5,8 +5,8 @@ import (
 	"github.com/ministryofjustice/cloud-platform-hammer-bot/commit"
 )
 
-func InitCommit(url string) (*git.Repository, error) {
-	repo, err := commit.CloneRepo(url)
+func InitCommit(url, user, token string) (*git.Repository, error) {
+	repo, err := commit.CloneRepo(url, user, token)
 	if err != nil {
 		panic(err)
 	}
