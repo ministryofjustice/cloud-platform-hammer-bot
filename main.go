@@ -15,7 +15,7 @@ func main() {
 		log.Fatal("Error initialising github client: ", ghErr)
 	}
 
-	ghRepo, ghErr := init_app.InitCommit(ghURL)
+	ghRepo, ghErr := init_app.InitCommit(ghURL, ghUser, ghToken)
 	if ghErr != nil {
 		log.Fatal("Error initialising github repo: ", ghErr)
 	}
