@@ -27,3 +27,22 @@ AFTER:
 - we should also think about in the future pushing an empty commit to retrigger the check (separate api route)
 - remove api ingress and call the api from the slack bot via the api service (not sure if we definetely need to do this)
 
+## Local Testing
+app.js is the main entry point for the slackbot. It can be run locally with the following commands:
+the tokens can be found in the slack app settings page under 'OAuth & Permissions' and 'Basic Information'
+
+```bash
+export SLACK_BOT_TOKEN=<slack bot token>
+export SLACK_SIGNING_SECRET=<slack signing secret>
+export SLACK_APP_TOKEN=<slack app token>
+
+node app.js
+``` 
+
+main.go is the main entry point for the api. It can be run locally with the following commands:
+
+```bash
+docker build . -t hammerbot:latest
+
+docker run -p 3000:3000 --hostname=cf432824e79f --user=1000 --env=GITHUB_TOKEN=<create a token in github to use here> --env=GITHUB_URL=https://github.com/ministryofjustice/cloud-platform-environments --env=GITHUB_USER=<set your user for testing> --env=PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin --workdir=/ --runtime=runc -d hammerbot:latest
+```

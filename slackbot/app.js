@@ -101,11 +101,6 @@ const retryLater = (ids, ts, retryInMs) => {
     if (result) {
       return true
     }
-
-    await postReply("It looks like checks on your pr are _still_ pending even after waiting a while. A Cloud Platform team member will come and take a look.", ts)
-    await addEmoji("hourglass_flowing_sand", ts)
-    await addEmoji("warning", ts)
-
   }, retryInMs)
 }
 
@@ -118,8 +113,35 @@ const postPendingRecent = async (data, ts, ids) => {
     await addEmoji("spinning-circle-of-death", ts)
 
     retryLater(ids, ts, (retryIn / NANO_SECOND) * 1000 + 10)
+    pendingOlderThan10Mins(data, ts, ids)
 
     return true
+  }
+
+  return false
+}
+
+const pendingOlderThan10Mins = async (data, ts, ids) => {
+  const pendingOlderThan10Mins = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec === 0) : false)
+
+  if (pendingOlderThan10Mins) {
+    await addEmoji("hourglass_flowing_sand", message.ts)
+    await postReply("Looks like concourse needs a kick, Hammer-Bot has pushed an empty commit to your pull request", message.ts)
+
+    const branch = data.map((pr) => pr.Branch).join(",")
+    console.log("branch", branch)
+
+    await pushEmptyCommit(branch)
+    await removeEmoji("hourglass_flowing_sand", message.ts)
+    await addEmoji("spinning-circle-of-death", message.ts)
+
+    retryLater(ids, message.ts, 480000) // 8 mins in ms
+    await postReply("It looks like checks on your pr are _still_ pending even after waiting a while. A Cloud Platform team member will come and take a look.", ts)
+    await addEmoji("hourglass_flowing_sand", ts)
+    await addEmoji("warning", ts)
+
+    return true
+    
   }
 
   return false
@@ -150,20 +172,10 @@ app.message('github.com/ministryofjustice/cloud-platform-environments/pull/', as
     return
   }
 
-  const pendingOlderThan10Mins = data.some((pr) => pr.InvalidChecks.length ? pr.InvalidChecks.some((check) => check.Status === 2 && check.RetryInNanoSec === 0) : false)
+  const pendingOlderThan10MinsResult = await pendingOlderThan10Mins(data, message.ts, ids)
 
-  if (pendingOlderThan10Mins) {
-    await addEmoji("hourglass_flowing_sand", message.ts)
-    await postReply("Looks like concourse needs a kick, Hammer-Bot has pushed an empty commit to your pull request", message.ts)
-
-    const branch = data.map((pr) => pr.Branch).join(",")
-    console.log("branch", branch)
-
-    await pushEmptyCommit(branch)
-    await removeEmoji("hourglass_flowing_sand", message.ts)
-    await addEmoji("spinning-circle-of-death", message.ts)
-
-    retryLater(ids, message.ts, 480000) // 8 mins in ms
+  if (pendingOlderThan10MinsResult) {
+    return
   }
 });
 
