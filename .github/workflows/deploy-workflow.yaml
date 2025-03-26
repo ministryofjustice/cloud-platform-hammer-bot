@@ -38,7 +38,7 @@ jobs:
     environment: ${{ inputs.env }}
     steps:
         - name: Checkout
-          uses: actions/checkout@v4
+          uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
 
         - name: Set cluster
           id: set-cluster
@@ -70,7 +70,7 @@ jobs:
 
         - name: Deploy image to K8 cloud-platform-hammer-bot (${{ inputs.env }}) namespace
           id: deploy-image
-          uses: vimeda/helm@v1.7.0
+          uses: vimeda/helm@8fb24318e538359380b6acaaee9aa686d5f0c5cb # v1.7.0
           with:
             release: hammer-bot
             namespace: ${{ secrets.kube_namespace }}
