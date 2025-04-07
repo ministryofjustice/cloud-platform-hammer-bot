@@ -1,7 +1,7 @@
 module github.com/ministryofjustice/cloud-platform-hammer-bot
 
 go 1.21.0
-toolchain go1.23.6
+toolchain go1.23.7
 
 require (
 	github.com/gin-contrib/zap v0.2.0
@@ -10,7 +10,7 @@ require (
 	github.com/google/go-github/v57 v57.0.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
-	golang.org/x/oauth2 v0.26.0
+	golang.org/x/oauth2 v0.28.0
 )
 
 require (
