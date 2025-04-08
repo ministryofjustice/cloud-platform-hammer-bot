@@ -31,6 +31,16 @@ spec:
                   key: github-token
             - name: GIN_MODE
               value: "release"
+            - name: GITHUB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: github-url
+                  key: github-url
+            - name: GITHUB_USER
+              valueFrom:
+                secretKeyRef:
+                  name: github-user
+                  key: github-user
 ---
 
 apiVersion: apps/v1
