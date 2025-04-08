@@ -3,7 +3,7 @@ import fetch from "node-fetch";
 
 const NANO_SECOND = 1000000000;
 
-const WAIT_MSECS = 90000; // 1.5 min
+const WAIT_MSECS = 480000; // 8 mins
 
 const LOG_LEVEL = process.env.ENVIRONMENT === "production" ? "info" : "debug";
 
