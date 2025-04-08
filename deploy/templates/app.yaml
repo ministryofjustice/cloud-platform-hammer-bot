@@ -35,12 +35,12 @@ spec:
               valueFrom:
                 secretKeyRef:
                   name: github-url
-                  key: github-url
+                  key: URL
             - name: GITHUB_USER
               valueFrom:
                 secretKeyRef:
                   name: github-user
-                  key: github-user
+                  key: USER
 ---
 
 apiVersion: apps/v1
