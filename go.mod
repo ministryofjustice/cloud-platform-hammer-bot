@@ -7,7 +7,7 @@ toolchain go1.24.1
 require (
 	github.com/gin-contrib/zap v1.1.5
 	github.com/gin-gonic/gin v1.10.1
-	github.com/go-git/go-git/v5 v5.16.0
+	github.com/go-git/go-git/v5 v5.16.2
 	github.com/google/go-github/v57 v57.0.0
 	github.com/stretchr/testify v1.10.0
 	go.uber.org/zap v1.27.0
