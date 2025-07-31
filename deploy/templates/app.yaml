@@ -25,6 +25,8 @@ spec:
               initialDelaySeconds: 2
           securityContext:
             allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
             capabilities:
               drop:
                 - ALL
@@ -71,6 +73,8 @@ spec:
             - containerPort: 3000
           securityContext:
             allowPrivilegeEscalation: false
+            seccompProfile:
+              type: RuntimeDefault
             capabilities:
               drop:
                 - ALL
