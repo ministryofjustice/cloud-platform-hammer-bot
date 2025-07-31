@@ -23,6 +23,12 @@ spec:
                 path: /healthz
                 port: 3000
               initialDelaySeconds: 2
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
           env:
             - name: GITHUB_TOKEN
               valueFrom:
@@ -63,6 +69,12 @@ spec:
           imagePullPolicy: IfNotPresent
           ports:
             - containerPort: 3000
+          securityContext:
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            runAsNonRoot: true
           env:
             - name: ENVIRONMENT
               value: "production"
