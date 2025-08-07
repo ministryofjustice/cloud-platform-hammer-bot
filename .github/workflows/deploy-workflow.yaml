@@ -36,6 +36,8 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     environment: ${{ inputs.env }}
+    permissions:
+      contents: read
     steps:
         - name: Checkout
           uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683 # v4.2.2
@@ -83,14 +85,12 @@ jobs:
               ingressIdentifier: api-${{ secrets.kube_namespace }}-${{ steps.set-cluster.outputs.INGRESS_COLOUR }}
               namespace: ${{ secrets.kube_namespace }}
               securityContext:
-              allowPrivilegeEscalation: false
-              seccompProfile:
-                type: RuntimeDefault
-              capabilities:
-                drop:
-                  - ALL
-              runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                seccompProfile:
+                  type: RuntimeDefault
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
           env:
             KUBECONFIG_FILE: ${{ env.FLAT_KUBE_CONFIG }}
-
-
