@@ -1,9 +1,9 @@
 module github.com/ministryofjustice/cloud-platform-hammer-bot
 
-go 1.25.2
+go 1.25
 
+toolchain go1.25.1
 
-toolchain go1.24.1
 require (
 	github.com/gin-contrib/zap v1.1.5
 	github.com/gin-gonic/gin v1.10.1
