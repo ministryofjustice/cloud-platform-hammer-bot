@@ -184,7 +184,8 @@ app.message(
     if (pendingOlderThan10Mins) {
       await addEmoji("hourglass_flowing_sand", message.ts);
       await postReply(
-        "Looks like concourse needs a kick, Hammer-Bot has pushed an empty commit to your pull request",
+        "Looks like concourse needs a kick, Could you please push a new empty commit to retrigger the checks?",
+        "e.g. `git commit --allow-empty -m 'Trigger CI' && git push`",
         message.ts,
       );
 
