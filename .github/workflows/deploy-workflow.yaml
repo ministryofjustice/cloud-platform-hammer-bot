@@ -72,25 +72,40 @@ jobs:
 
         - name: Deploy image to K8 cloud-platform-hammer-bot (${{ inputs.env }}) namespace
           id: deploy-image
-          uses: vimeda/helm@8fb24318e538359380b6acaaee9aa686d5f0c5cb # v1.7.0
-          with:
-            release: hammer-bot
-            namespace: ${{ secrets.kube_namespace }}
-            chart: deploy
-            values: |
-              ecrUrl: ${{ secrets.ecr_url }}
-              imageTag: ${{ inputs.image_tag }}
-              slackbotImageTag: ${{ inputs.slackbot_image_tag }}
-              cluster: ${{ steps.set-cluster.outputs.CLUSTER }}
-              ingressIdentifier: api-${{ secrets.kube_namespace }}-${{ steps.set-cluster.outputs.INGRESS_COLOUR }}
-              namespace: ${{ secrets.kube_namespace }}
-              securityContext:
-                allowPrivilegeEscalation: false
-                seccompProfile:
-                  type: RuntimeDefault
-                capabilities:
-                  drop:
-                    - ALL
-                runAsNonRoot: true
+          shell: bash
           env:
             KUBECONFIG_FILE: ${{ env.FLAT_KUBE_CONFIG }}
+            ECR_URL: ${{ secrets.ecr_url }}
+            IMAGE_TAG: ${{ inputs.image_tag }}
+            SLACKBOT_IMAGE_TAG: ${{ inputs.slackbot_image_tag }}
+            CLUSTER: ${{ steps.set-cluster.outputs.CLUSTER }}
+            KUBE_NAMESPACE: ${{ secrets.kube_namespace }}
+            INGRESS_COLOUR: ${{ steps.set-cluster.outputs.INGRESS_COLOUR }}
+          run: |
+            KUBECONFIG_TEMP=$(mktemp)
+            echo "$KUBECONFIG_FILE" > "$KUBECONFIG_TEMP"
+            export KUBECONFIG="$KUBECONFIG_TEMP"
+
+            VALUES_TEMP=$(mktemp --suffix=.yaml)
+            cat > "$VALUES_TEMP" << EOF
+            ecrUrl: "${ECR_URL}"
+            imageTag: "${IMAGE_TAG}"
+            slackbotImageTag: "${SLACKBOT_IMAGE_TAG}"
+            cluster: "${CLUSTER}"
+            ingressIdentifier: "api-${KUBE_NAMESPACE}-${INGRESS_COLOUR}"
+            namespace: "${KUBE_NAMESPACE}"
+            securityContext:
+              allowPrivilegeEscalation: false
+              seccompProfile:
+                type: RuntimeDefault
+              capabilities:
+                drop:
+                  - ALL
+              runAsNonRoot: true
+            EOF
+
+            helm upgrade --install hammer-bot deploy \
+              --namespace "${KUBE_NAMESPACE}" \
+              --values "$VALUES_TEMP"
+
+            rm -f "$KUBECONFIG_TEMP" "$VALUES_TEMP"
