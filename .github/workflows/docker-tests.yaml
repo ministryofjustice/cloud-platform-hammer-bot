@@ -18,6 +18,6 @@ jobs:
         run: docker images
 
       - name: Run docker tests
-        uses: docker://gcr.io/gcp-runtimes/container-structure-test@sha256:1ad62d510afe4c326153cf4a9f2e52036dd28cb0893278263b3245e87b78d570 # latest
+        uses: docker://ghcr.io/googlecontainertools/container-structure-test@sha256:710da3ca8ed29a42423315592f74f02df4e3d2ba19f1df7257bd481ea75ba5aa # latest v1.22.1
         with:
           args: "test --image api-test --config docker-test.yaml"
